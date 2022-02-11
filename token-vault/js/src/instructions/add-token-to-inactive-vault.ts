@@ -26,6 +26,20 @@ import {
 } from '../generated';
 import { InstructionsWithAccounts } from '../types';
 
+/**
+ * Allows to setup a safety deposit box and all related accounts easily.
+ * It exposes the {@link PublicKey}s for all created accounts as well as the
+ * {@link tokenMintPair} {@link Keypair} if it was created.
+ *
+ * Use {@link SafetyDepositSetup.create} in order to instantiate it.
+ *
+ * The {@link instructions} need to be provided to a transaction which is
+ * executed before the instruction to add tokens to the vault. Make sure to
+ * provide the {@link signers} with that transaction.
+ *
+ * The {@link SafetyDepositSetup} is then provided to {@link addTokenToInactiveVault}
+ * in order to create the instruction to add the tokens to the vault.
+ */
 export class SafetyDepositSetup {
   private constructor(
     /** The parent vault for which this deposit box will be used */
