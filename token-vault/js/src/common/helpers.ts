@@ -14,6 +14,7 @@ import {
   SystemProgram,
   TransactionInstruction,
 } from '@solana/web3.js';
+import { InstructionsWithAccounts } from '../types';
 import { VAULT_PREFIX, VAULT_PROGRAM_PUBLIC_KEY } from './consts';
 
 // -----------------
@@ -87,8 +88,8 @@ export function createMint(
   decimals: number,
   mintAuthority: PublicKey,
   freezeAuthority: PublicKey,
-): [TransactionInstruction[], Signer[], { mintAccount: PublicKey }] {
-  const [createMintIx, createMintSigner, mintAccount] = createUninitializedMint(
+): InstructionsWithAccounts<{ mintAccountPair: Keypair }> {
+  const [createMintIx, mintAccountPair, mintAccount] = createUninitializedMint(
     payer,
     mintRentExempt,
   );
@@ -101,7 +102,7 @@ export function createMint(
     freezeAuthority,
   );
 
-  return [[createMintIx, initMintIx], [createMintSigner], { mintAccount }];
+  return [[createMintIx, initMintIx], [mintAccountPair], { mintAccountPair }];
 }
 
 export function getMintRentExempt(connection: Connection) {
@@ -111,7 +112,7 @@ export function getMintRentExempt(connection: Connection) {
 export function createUninitializedMint(
   payer: PublicKey,
   amount: number,
-): [TransactionInstruction, Signer, PublicKey] {
+): [TransactionInstruction, Keypair, PublicKey] {
   const mintAccount = Keypair.generate();
   const instruction = SystemProgram.createAccount({
     fromPubkey: payer,
