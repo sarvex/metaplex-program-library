@@ -88,7 +88,7 @@ export function createMint(
   decimals: number,
   mintAuthority: PublicKey,
   freezeAuthority: PublicKey,
-): InstructionsWithAccounts<{ mintAccountPair: Keypair }> {
+): InstructionsWithAccounts<{ mintAccountPair: Keypair; mintAccount: PublicKey }> {
   const [createMintIx, mintAccountPair, mintAccount] = createUninitializedMint(
     payer,
     mintRentExempt,
@@ -102,7 +102,7 @@ export function createMint(
     freezeAuthority,
   );
 
-  return [[createMintIx, initMintIx], [mintAccountPair], { mintAccountPair }];
+  return [[createMintIx, initMintIx], [mintAccountPair], { mintAccountPair, mintAccount }];
 }
 
 export function getMintRentExempt(connection: Connection) {

@@ -1,7 +1,14 @@
 import test from 'tape';
 import spok from 'spok';
 
-import { addressLabels, init, killStuckProcess, spokSameBignum, spokSamePubkey } from './utils';
+import {
+  addressLabels,
+  assertIsNotNull,
+  init,
+  killStuckProcess,
+  spokSameBignum,
+  spokSamePubkey,
+} from './utils';
 import { Transaction } from '@solana/web3.js';
 import { assertConfirmedTransaction, assertTransactionSummary } from '@metaplex-foundation/amman';
 import { ExternalPriceAccount, Key, QUOTE_MINT } from '../src/mpl-token-vault';
@@ -29,6 +36,7 @@ test('external account: create', async (t) => {
   });
 
   const externalPriceAccountInfo = await connection.getAccountInfo(externalPriceAccount);
+  assertIsNotNull(t, externalPriceAccountInfo);
   const [externalPriceAccountData] = ExternalPriceAccount.fromAccountInfo(externalPriceAccountInfo);
 
   spok(t, externalPriceAccountData, {

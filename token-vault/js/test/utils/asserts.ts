@@ -1,3 +1,4 @@
+import { Test } from 'tape';
 import { bignum, COption } from '@metaplex-foundation/beet';
 import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
@@ -34,4 +35,8 @@ export function spokSameBignum(a: bignum): Specification<bignum> {
   same.$spec = `spokSameBignum(${a})`;
   same.$description = `${a} equal`;
   return same;
+}
+
+export function assertIsNotNull<T>(t: Test, x: T | null | undefined): asserts x is T {
+  t.ok(x, 'should be non null');
 }

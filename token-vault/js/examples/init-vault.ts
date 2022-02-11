@@ -12,6 +12,7 @@ import {
   Transaction,
 } from '@solana/web3.js';
 import { LOCALHOST } from '@metaplex-foundation/amman';
+import { strict as assert } from 'assert';
 
 import {
   QUOTE_MINT,
@@ -73,6 +74,7 @@ async function main() {
   // 3. We can now query the initialized vault
   // -----------------
   const vaultAccountInfo = await connection.getAccountInfo(initVaultAccounts.vault);
+  assert(vaultAccountInfo != null);
   const [vaultAccount] = Vault.fromAccountInfo(vaultAccountInfo);
   console.log(vaultAccount.pretty());
 }

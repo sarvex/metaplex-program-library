@@ -2,7 +2,7 @@ import { Test } from 'tape';
 import { Connection, PublicKey } from '@solana/web3.js';
 import spok from 'spok';
 import { InitVaultInstructionAccounts, Key, Vault, VaultState } from '../../src/generated';
-import { spokSameBignum, spokSamePubkey } from './asserts';
+import { assertIsNotNull, spokSameBignum, spokSamePubkey } from './asserts';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 export async function assertInactiveVault(
@@ -21,6 +21,7 @@ export async function assertInactiveVault(
   } = initVaultAccounts;
 
   const vaultAccountInfo = await connection.getAccountInfo(vault);
+  assertIsNotNull(t, vaultAccountInfo);
   const [vaultAccount] = Vault.fromAccountInfo(vaultAccountInfo);
 
   spok(t, vaultAccount, {

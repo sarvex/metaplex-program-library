@@ -3,6 +3,7 @@ import test from 'tape';
 import {
   addressLabels,
   assertInactiveVault,
+  assertIsNotNull,
   initVault,
   killStuckProcess,
   spokSamePubkey,
@@ -10,16 +11,17 @@ import {
 import { Transaction } from '@solana/web3.js';
 import { assertConfirmedTransaction, assertTransactionSummary } from '@metaplex-foundation/amman';
 import {
-  AddTokenToInactiveVault,
+  addTokenToInactiveVault,
   AddTokenToInactiveVaultInstructionAccounts,
   Key,
   SafetyDepositBox,
+  SafetyDepositSetup,
 } from '../src/mpl-token-vault';
 import spok from 'spok';
 
 killStuckProcess();
 
-test('inactive vault: add token', async (t) => {
+test('inactive vault: add tokens once', async (t) => {
   const {
     transactionHandler,
     connection,
@@ -28,68 +30,36 @@ test('inactive vault: add token', async (t) => {
   const { payer, vault, authority: vaultAuthority, vaultAuthorityPair } = initVaultAccounts;
 
   // -----------------
-  // Prepare vault accounts
+  // Prepare vault accounts for Safety Deposit
   // -----------------
   const TOKEN_AMOUNT = 2;
 
-  const [createMintIxs, createMintSigners, { mintAccount }] =
-    await AddTokenToInactiveVault.createTokenMint(connection, payer);
+  const safetyDepositSetup = await SafetyDepositSetup.create(connection, {
+    payer,
+    vault,
+    mintAmount: TOKEN_AMOUNT,
+  });
 
-  const inactiveVault = new AddTokenToInactiveVault(connection, vault, vaultAuthority, mintAccount);
-
-  const safetyDeposit = await inactiveVault.getSafetyDepositAccount();
-  const [tokenAccountIxs, tokenAccountSigners, { tokenAccount }] =
-    await inactiveVault.createTokenAccount(payer, TOKEN_AMOUNT);
-  const [storeAccountIxs, storeAccountSigners, { storeAccount }] =
-    await inactiveVault.createStoreAccount(payer, vault);
-  const [approveTransferIxs, approveTransferSigners, { transferAuthority, transferAuthorityPair }] =
-    await AddTokenToInactiveVault.approveTransferAuthority(payer, tokenAccount, TOKEN_AMOUNT);
-
+  const { safetyDeposit, transferAuthority, store, tokenMint, tokenAccount } = safetyDepositSetup;
   addressLabels.addLabels({
-    mintAccount,
+    tokenMint,
     tokenAccount,
     safetyDeposit,
-    storeAccount,
+    store,
     transferAuthority,
   });
 
   // -----------------
   // Setup Add Token Instruction
   // -----------------
-  const accounts: Omit<AddTokenToInactiveVaultInstructionAccounts, 'systemAccount'> = {
-    safetyDepositAccount: safetyDeposit,
-    tokenAccount,
-    store: storeAccount,
-    vault,
-    vaultAuthority,
-    payer,
-    transferAuthority,
-  };
-
-  const addTokenIx = await inactiveVault.addTokenToInactiveVault({ amount: 2 }, accounts);
-
-  // -----------------
-  // Setup Prepare Accounts + Add Token Transaction
-  // -----------------
-  const tx = new Transaction()
-    .add(...createMintIxs)
-    .add(...tokenAccountIxs)
-    .add(...storeAccountIxs)
-    .add(...approveTransferIxs)
-    .add(addTokenIx);
-
-  const signers = [
-    ...createMintSigners,
-    ...tokenAccountSigners,
-    ...storeAccountSigners,
-    ...approveTransferSigners,
-    transferAuthorityPair,
-    vaultAuthorityPair,
-  ];
+  const addTokenIx = await addTokenToInactiveVault(safetyDepositSetup, { payer, vaultAuthority });
 
   // -----------------
   // Submit and verify transaction
   // -----------------
+  const tx = new Transaction().add(...safetyDepositSetup.instructions).add(addTokenIx);
+  const signers = [...safetyDepositSetup.signers, vaultAuthorityPair];
+
   const res = await transactionHandler.sendAndConfirmTransaction(tx, signers);
   assertConfirmedTransaction(t, res.txConfirmed);
   assertTransactionSummary(t, res.txSummary, {
@@ -106,13 +76,15 @@ test('inactive vault: add token', async (t) => {
   // Verify account states
   // -----------------
   const safetyDepositAccountInfo = await connection.getAccountInfo(safetyDeposit);
+  assertIsNotNull(t, safetyDepositAccountInfo);
   const [safetyDepositAccount] = SafetyDepositBox.fromAccountInfo(safetyDepositAccountInfo);
+
   spok(t, safetyDepositAccount, {
     $topic: 'safetyDepositAccount',
     key: Key.SafetyDepositBoxV1,
     vault: spokSamePubkey(vault),
-    tokenMint: spokSamePubkey(mintAccount),
-    store: spokSamePubkey(storeAccount),
+    tokenMint: spokSamePubkey(tokenMint),
+    store: spokSamePubkey(store),
   });
 
   await assertInactiveVault(t, connection, initVaultAccounts, {
