@@ -12,7 +12,6 @@ import { Transaction } from '@solana/web3.js';
 import { assertConfirmedTransaction, assertTransactionSummary } from '@metaplex-foundation/amman';
 import {
   addTokenToInactiveVault,
-  AddTokenToInactiveVaultInstructionAccounts,
   Key,
   SafetyDepositBox,
   SafetyDepositSetup,
@@ -40,14 +39,7 @@ test('inactive vault: add tokens once', async (t) => {
     mintAmount: TOKEN_AMOUNT,
   });
 
-  const { safetyDeposit, transferAuthority, store, tokenMint, tokenAccount } = safetyDepositSetup;
-  addressLabels.addLabels({
-    tokenMint,
-    tokenAccount,
-    safetyDeposit,
-    store,
-    transferAuthority,
-  });
+  addressLabels.findAndAddLabels(safetyDepositSetup);
 
   // -----------------
   // Setup Add Token Instruction
@@ -75,6 +67,7 @@ test('inactive vault: add tokens once', async (t) => {
   // -----------------
   // Verify account states
   // -----------------
+  const { safetyDeposit, tokenMint, store } = safetyDepositSetup;
   const safetyDepositAccountInfo = await connection.getAccountInfo(safetyDeposit);
   assertIsNotNull(t, safetyDepositAccountInfo);
   const [safetyDepositAccount] = SafetyDepositBox.fromAccountInfo(safetyDepositAccountInfo);
