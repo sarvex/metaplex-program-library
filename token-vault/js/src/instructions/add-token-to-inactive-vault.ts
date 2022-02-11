@@ -16,6 +16,7 @@ import {
   getMintRentExempt,
   createAssociatedTokenAccount,
   approveTokenTransfer,
+  pdaForVault,
 } from '../common/helpers';
 import {
   AddTokenToInactiveVaultInstructionAccounts,
@@ -57,15 +58,17 @@ export class AddTokenToInactiveVault {
 
   async createStoreAccount(
     payer: PublicKey,
+    vault: PublicKey,
   ): Promise<InstructionsWithAccounts<{ storeAccount: PublicKey }>> {
+    const vaultPDA = await pdaForVault(vault);
     const tokenAccountRentExempt = await this.connection.getMinimumBalanceForRentExemption(
       TokenAccountLayout.span,
     );
     const [instructions, signers, { tokenAccount: storeAccount }] = createTokenAccount(
       payer,
       tokenAccountRentExempt,
-      this.tokenMint,
-      this.vaultAuthority,
+      this.tokenMint, // mint
+      vaultPDA, // owner
     );
     return [instructions, signers, { storeAccount }];
   }
