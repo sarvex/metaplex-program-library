@@ -5,6 +5,7 @@ import debug from 'debug';
 import { VAULT_PROGRAM_ID } from '../../src/mpl-token-vault';
 
 export * from './asserts';
+export * from './vault-asserts';
 export * from './transactions';
 
 export const logError = debug('vault:test:error');
