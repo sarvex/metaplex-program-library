@@ -35,7 +35,13 @@ async function main() {
   // This is the payer account which should have sufficient amount of SOL
   const payer = await fundedPayer();
   const vaultAuthority = Keypair.generate();
+  return initVault(connection, { payer, vaultAuthority });
+}
 
+export async function initVault(
+  connection: Connection,
+  { payer, vaultAuthority }: { payer: Keypair; vaultAuthority: Keypair },
+) {
   // -----------------
   // 1. Setup Accounts to use when initializing the vault
   //    You may not need to do this if you already have those accounts
@@ -77,6 +83,8 @@ async function main() {
   assert(vaultAccountInfo != null);
   const [vaultAccount] = Vault.fromAccountInfo(vaultAccountInfo);
   console.log(vaultAccount.pretty());
+
+  return { payer, vaultAuthority, ...initVaultAccounts };
 }
 
 main()
