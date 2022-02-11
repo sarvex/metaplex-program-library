@@ -33,7 +33,9 @@ const AddTokenToInactiveVaultStruct = new beet.BeetArgsStruct<
  */
 export type AddTokenToInactiveVaultInstructionAccounts = {
   // initialized       : no
-  // key               : != safety_deposit_account_key (PDA for vault  + tokenAccount)
+  // key               : != safety_deposit_account_key (PDA for vault + tokenAccount)
+  // - will contain a store key that points to an spl-token account that contains the tokens
+  // - allocated and initialized by the program
   safetyDepositAccount: web3.PublicKey;
 
   // owner       : TokenProgram
