@@ -1,7 +1,7 @@
 import { AccountLayout as TokenAccountLayout, MintLayout } from '@solana/spl-token';
 import { Connection, Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
-import { VAULT_PREFIX, VAULT_PROGRAM_PUBLIC_KEY } from '../common/consts';
-import { createMint, createTokenAccount } from '../common/helpers';
+import { VAULT_PROGRAM_PUBLIC_KEY } from '../common/consts';
+import { createMint, createTokenAccount, pdaForVault } from '../common/helpers';
 import {
   createInitVaultInstruction,
   InitVaultArgs,
@@ -101,17 +101,9 @@ export class InitVault {
     });
   }
 }
+
 async function vaultAccountPDA() {
   const vaultPair = Keypair.generate();
-
-  const [vaultPDA] = await PublicKey.findProgramAddress(
-    [
-      Buffer.from(VAULT_PREFIX),
-      VAULT_PROGRAM_PUBLIC_KEY.toBuffer(),
-      vaultPair.publicKey.toBuffer(),
-    ],
-    VAULT_PROGRAM_PUBLIC_KEY,
-  );
-
+  const vaultPDA = await pdaForVault(vaultPair.publicKey);
   return { vaultPair, vaultPDA };
 }

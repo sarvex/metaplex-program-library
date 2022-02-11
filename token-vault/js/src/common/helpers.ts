@@ -14,6 +14,7 @@ import {
   SystemProgram,
   TransactionInstruction,
 } from '@solana/web3.js';
+import { VAULT_PREFIX, VAULT_PROGRAM_PUBLIC_KEY } from './consts';
 
 // -----------------
 // Helpers from common/src/actions/action.ts adapted to return instructions + signers instead of mutating
@@ -168,4 +169,15 @@ export function createUninitializedTokenAccount(
   });
 
   return [instruction, tokenAccount, tokenAccount.publicKey];
+}
+
+// -----------------
+// PDA
+// -----------------
+export async function pdaForVault(vault: PublicKey) {
+  const [vaultPDA] = await PublicKey.findProgramAddress(
+    [Buffer.from(VAULT_PREFIX), VAULT_PROGRAM_PUBLIC_KEY.toBuffer(), vault.toBuffer()],
+    VAULT_PROGRAM_PUBLIC_KEY,
+  );
+  return vaultPDA;
 }
