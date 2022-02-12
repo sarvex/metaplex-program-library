@@ -1,5 +1,5 @@
 import { Test } from 'tape';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection } from '@solana/web3.js';
 import spok from 'spok';
 import { InitVaultInstructionAccounts, Key, Vault, VaultState } from '../../src/generated';
 import { assertIsNotNull, spokSameBignum, spokSamePubkey } from './asserts';
@@ -9,8 +9,9 @@ export async function assertInactiveVault(
   t: Test,
   connection: Connection,
   initVaultAccounts: InitVaultInstructionAccounts,
-  args: { allowFurtherShareCreation: boolean; tokenTypeCount: number },
+  args: { allowFurtherShareCreation?: boolean; tokenTypeCount?: number } = {},
 ) {
+  const { allowFurtherShareCreation = true, tokenTypeCount = 0 } = args;
   const {
     vault,
     authority: vaultAuthority,
@@ -33,8 +34,8 @@ export async function assertInactiveVault(
     fractionTreasury: spokSamePubkey(fractionTreasury),
     pricingLookupAddress: spokSamePubkey(pricingLookupAddress),
     authority: spokSamePubkey(vaultAuthority),
-    allowFurtherShareCreation: args.allowFurtherShareCreation,
-    tokenTypeCount: args.tokenTypeCount,
+    allowFurtherShareCreation,
+    tokenTypeCount,
     state: VaultState.Inactive,
     lockedPricePerShare: spokSameBignum(0),
   });
