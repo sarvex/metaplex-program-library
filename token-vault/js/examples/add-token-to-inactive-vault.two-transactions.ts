@@ -29,6 +29,7 @@ import { fundedPayer } from './helpers';
 const host = LOCALHOST;
 
 async function main() {
+  console.log('+++++++ Ex: add-token-to-inactive-vault.two-transactions.ts  +++++++');
   const connection = new Connection(host, 'singleGossip');
 
   const payerPair = await fundedPayer(connection, 5);

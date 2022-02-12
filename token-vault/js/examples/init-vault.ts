@@ -33,6 +33,7 @@ const host = LOCALHOST;
 
 // -----------------
 async function main() {
+  console.log('+++++++ Ex: init-vault.ts  +++++++');
   const connection = new Connection(host, 'singleGossip');
 
   // This is the payer account which should have sufficient amount of SOL
