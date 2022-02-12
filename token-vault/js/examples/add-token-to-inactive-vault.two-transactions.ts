@@ -122,8 +122,10 @@ export async function addTokenToVaultTwoTransactions(
 }
 
 if (module === require.main) {
-  main().catch((err: any) => {
-    console.error(err);
-    process.exit(1);
-  });
+  main()
+    .then(() => process.exit(0))
+    .catch((err: any) => {
+      console.error(err);
+      process.exit(1);
+    });
 }
