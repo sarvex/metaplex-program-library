@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "./dist",
     "baseUrl": ".",
-    "strict": true
+    "strict": true,
+    "useUnknownInCatchVariables": false
   },
   "include": ["./src"],
   "exclude": ["node_modules", "dist", "build", "lib"]
