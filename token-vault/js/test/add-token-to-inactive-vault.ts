@@ -82,6 +82,7 @@ test('inactive vault: add tokens once', async (t) => {
     vault: spokSamePubkey(vault),
     tokenMint: spokSamePubkey(tokenMint),
     store: spokSamePubkey(store),
+    order: 0,
   });
 
   await assertInactiveVault(t, connection, initVaultAccounts, {
@@ -113,6 +114,7 @@ test('inactive vault: add tokens thrice via three different safety deposit boxes
       vault: spokSamePubkey(vault),
       tokenMint: spokSamePubkey(tokenMint),
       store: spokSamePubkey(store),
+      order: tokenTypeCount - 1,
     });
 
     await assertInactiveVault(t, connection, initVaultAccounts, {
