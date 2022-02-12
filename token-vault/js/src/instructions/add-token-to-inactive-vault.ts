@@ -55,8 +55,18 @@ export class SafetyDepositSetup {
      * token account holding the tokens
      */
     readonly safetyDeposit: PublicKey,
-    /** Transfer Authority to move desired token amount from token account to safety deposit */
+
+    /**
+     * Transfer Authority to move desired token amount from token account to safety deposit
+     * which happens as part of processing the add token instruction.
+     */
     readonly transferAuthority: PublicKey,
+    /**
+     * Transfer Authority keypair is not included with the signers to setup the safety deposit.
+     * However it is needed when the token is added to the vault.
+     * Make sure to include it as the signer when executing that transaction.
+     */
+    readonly transferAuthorityPair: Keypair,
 
     /** The amount of tokens to transfer to the store */
     readonly mintAmount: number,
@@ -183,7 +193,6 @@ export class SafetyDepositSetup {
       amount: args.mintAmount,
     });
     instructions.push(approveTransferIx);
-    signers.push(transferAuthorityPair);
 
     return new SafetyDepositSetup(
       vault,
@@ -192,6 +201,7 @@ export class SafetyDepositSetup {
       storeAccount,
       safetyDepositAccount,
       transferAuthorityPair.publicKey,
+      transferAuthorityPair,
       args.mintAmount,
       instructions,
       signers,

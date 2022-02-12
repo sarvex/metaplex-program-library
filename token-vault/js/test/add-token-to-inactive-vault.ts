@@ -50,7 +50,11 @@ test('inactive vault: add tokens once', async (t) => {
   // Submit and verify transaction
   // -----------------
   const tx = new Transaction().add(...safetyDepositSetup.instructions).add(addTokenIx);
-  const signers = [...safetyDepositSetup.signers, vaultAuthorityPair];
+  const signers = [
+    ...safetyDepositSetup.signers,
+    safetyDepositSetup.transferAuthorityPair,
+    vaultAuthorityPair,
+  ];
 
   const res = await transactionHandler.sendAndConfirmTransaction(tx, signers);
   assertConfirmedTransaction(t, res.txConfirmed);
@@ -122,7 +126,11 @@ test('inactive vault: add tokens thrice via three different safety deposit boxes
     addTokenIx: TransactionInstruction,
   ) {
     const tx = new Transaction().add(...safetyDepositSetup.instructions).add(addTokenIx);
-    const signers = [...safetyDepositSetup.signers, vaultAuthorityPair];
+    const signers = [
+      ...safetyDepositSetup.signers,
+      safetyDepositSetup.transferAuthorityPair,
+      vaultAuthorityPair,
+    ];
 
     const res = await transactionHandler.sendAndConfirmTransaction(tx, signers);
     assertConfirmedTransaction(t, res.txConfirmed);
