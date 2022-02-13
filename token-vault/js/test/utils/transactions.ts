@@ -14,6 +14,7 @@ import {
   InitVaultInstructionAccounts,
   QUOTE_MINT,
 } from '../../src/mpl-token-vault';
+import { pdaForVault } from '../../src/common/helpers';
 
 export async function init() {
   const [payer, payerPair] = addressLabels.genKeypair('payer');
@@ -80,7 +81,10 @@ export async function initInitVaultAccounts(
   return initVaultAccounts;
 }
 
-export async function initVault(t: Test, args: { allowFurtherShareCreation: boolean }) {
+export async function initVault(
+  t: Test,
+  args: { allowFurtherShareCreation: boolean } = { allowFurtherShareCreation: false },
+) {
   const { transactionHandler, connection, payer, payerPair, vaultAuthority, vaultAuthorityPair } =
     await init();
   const initVaultAccounts = await initInitVaultAccounts(
@@ -95,9 +99,18 @@ export async function initVault(t: Test, args: { allowFurtherShareCreation: bool
   const initVaultTx = new Transaction().add(initVaultIx);
   await transactionHandler.sendAndConfirmTransaction(initVaultTx, []);
 
+  const fractionMintAuthority = await pdaForVault(initVaultAccounts.vault);
+  addressLabels.addLabels({ fractionalMintAuthority: fractionMintAuthority });
+
   return {
     connection,
     transactionHandler,
-    accounts: { payer, payerPair, vaultAuthorityPair, ...initVaultAccounts },
+    accounts: {
+      payer,
+      payerPair,
+      vaultAuthorityPair,
+      fractionMintAuthority,
+      ...initVaultAccounts,
+    },
   };
 }

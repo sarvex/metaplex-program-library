@@ -11,7 +11,27 @@ export async function assertInactiveVault(
   initVaultAccounts: InitVaultInstructionAccounts,
   args: { allowFurtherShareCreation?: boolean; tokenTypeCount?: number } = {},
 ) {
-  const { allowFurtherShareCreation = true, tokenTypeCount = 0 } = args;
+  return assertVault(t, connection, initVaultAccounts, { ...args, state: VaultState.Inactive });
+}
+
+export async function assertActiveVault(
+  t: Test,
+  connection: Connection,
+  initVaultAccounts: InitVaultInstructionAccounts,
+  args: { allowFurtherShareCreation?: boolean; tokenTypeCount?: number } = {},
+) {
+  return assertVault(t, connection, initVaultAccounts, { ...args, state: VaultState.Active });
+}
+
+async function assertVault(
+  t: Test,
+  connection: Connection,
+  initVaultAccounts: InitVaultInstructionAccounts,
+  args: { allowFurtherShareCreation?: boolean; tokenTypeCount?: number; state: VaultState } = {
+    state: VaultState.Inactive,
+  },
+) {
+  const { allowFurtherShareCreation = false, tokenTypeCount = 0, state } = args;
   const {
     vault,
     authority: vaultAuthority,
@@ -36,7 +56,7 @@ export async function assertInactiveVault(
     authority: spokSamePubkey(vaultAuthority),
     allowFurtherShareCreation,
     tokenTypeCount,
-    state: VaultState.Inactive,
+    state,
     lockedPricePerShare: spokSameBignum(0),
   });
 }

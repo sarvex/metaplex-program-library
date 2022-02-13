@@ -46,7 +46,9 @@ test('set authority: inactive vault', async (t) => {
         // TODO(thlorenz): this message in the program should be improved as it doesn't indicate funding issue
         /disallowing new authority .+ does not exist/i,
       ]);
-      await assertInactiveVault(t, connection, initVaultAccounts);
+      await assertInactiveVault(t, connection, initVaultAccounts, {
+        allowFurtherShareCreation: true,
+      });
     }
   }
   {
@@ -58,6 +60,11 @@ test('set authority: inactive vault', async (t) => {
       msgRx: [/Set Authority/i, /success/i],
     });
 
-    await assertInactiveVault(t, connection, { ...initVaultAccounts, authority: newAuthority });
+    await assertInactiveVault(
+      t,
+      connection,
+      { ...initVaultAccounts, authority: newAuthority },
+      { allowFurtherShareCreation: true },
+    );
   }
 });
