@@ -1183,7 +1183,7 @@ __metadata:
   dependencies:
     "@metaplex-foundation/amman": ^0.0.3
     "@metaplex-foundation/mpl-core": ^0.0.2
-    "@solana/spl-token": 0.1.8
+    "@solana/spl-token": ^0.1.8
     "@solana/web3.js": ^1.34.0
     "@types/debug": ^4.1.7
     "@types/tape": ^4.13.2
@@ -1549,7 +1549,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@solana/spl-token@npm:0.1.8, @solana/spl-token@npm:^0.1.8":
+"@solana/spl-token@npm:^0.1.8":
   version: 0.1.8
   resolution: "@solana/spl-token@npm:0.1.8"
   dependencies:
