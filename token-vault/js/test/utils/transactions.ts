@@ -9,6 +9,8 @@ import {
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import { addressLabels } from '.';
 import {
+  activateVault,
+  ActivateVaultAccounts,
   createExternalPriceAccount,
   InitVault,
   InitVaultInstructionAccounts,
@@ -34,7 +36,7 @@ export async function init() {
   };
 }
 
-export async function initInitVaultAccounts(
+export async function setupInitVaultAccounts(
   t: Test,
   connection: Connection,
   transactionHandler: PayerTransactionHandler,
@@ -87,7 +89,7 @@ export async function initVault(
 ) {
   const { transactionHandler, connection, payer, payerPair, vaultAuthority, vaultAuthorityPair } =
     await init();
-  const initVaultAccounts = await initInitVaultAccounts(
+  const initVaultAccounts = await setupInitVaultAccounts(
     t,
     connection,
     transactionHandler,
@@ -112,5 +114,43 @@ export async function initVault(
       fractionMintAuthority,
       ...initVaultAccounts,
     },
+  };
+}
+
+export async function initAndActivateVault(
+  t: Test,
+  args: { allowFurtherShareCreation: boolean; numberOfShares?: number } = {
+    allowFurtherShareCreation: false,
+  },
+) {
+  const { numberOfShares = 0 } = args;
+  const { transactionHandler, connection, accounts: initVaultAccounts } = await initVault(t);
+  const {
+    vault,
+    authority: vaultAuthority,
+    vaultAuthorityPair,
+    fractionMint,
+    fractionTreasury,
+  } = initVaultAccounts;
+
+  addressLabels.addLabels(initVaultAccounts);
+
+  const accounts: ActivateVaultAccounts = {
+    vault,
+    vaultAuthority,
+    fractionMint,
+    fractionTreasury,
+  };
+
+  const activateVaultIx = await activateVault(vault, accounts, numberOfShares);
+
+  const tx = new Transaction().add(activateVaultIx);
+  const signers = [vaultAuthorityPair];
+  await transactionHandler.sendAndConfirmTransaction(tx, signers);
+
+  return {
+    connection,
+    transactionHandler,
+    accounts: initVaultAccounts,
   };
 }

@@ -4,12 +4,17 @@ import {
   addressLabels,
   assertInactiveVault,
   assertIsNotNull,
+  initAndActivateVault,
   initVault,
   killStuckProcess,
   spokSamePubkey,
 } from './utils';
 import { Transaction, TransactionInstruction } from '@solana/web3.js';
-import { assertConfirmedTransaction, assertTransactionSummary } from '@metaplex-foundation/amman';
+import {
+  assertConfirmedTransaction,
+  assertError,
+  assertTransactionSummary,
+} from '@metaplex-foundation/amman';
 import {
   addTokenToInactiveVault,
   Key,
@@ -190,6 +195,38 @@ test('inactive vault: add tokens thrice via three different safety deposit boxes
     const addTokenIx = await addTokenToInactiveVault(safetyDepositSetup, { payer, vaultAuthority });
     await submitAndVerifyTransaction(safetyDepositSetup, addTokenIx);
     await verifyAccountStates(safetyDepositSetup, 3);
+  }
+});
+
+test('active vault: trying to add tokens fails', async (t) => {
+  const {
+    transactionHandler,
+    connection,
+    accounts: initVaultAccounts,
+  } = await initAndActivateVault(t, { allowFurtherShareCreation: true, numberOfShares: 9 });
+  const { payer, vault, authority: vaultAuthority, vaultAuthorityPair } = initVaultAccounts;
+
+  const TOKEN_AMOUNT = 2;
+  const safetyDepositSetup = await SafetyDepositSetup.create(connection, {
+    payer,
+    vault,
+    mintAmount: TOKEN_AMOUNT,
+  });
+  addressLabels.findAndAddLabels(safetyDepositSetup);
+
+  const addTokenIx = await addTokenToInactiveVault(safetyDepositSetup, { payer, vaultAuthority });
+
+  const tx = new Transaction().add(...safetyDepositSetup.instructions).add(addTokenIx);
+  const signers = [
+    ...safetyDepositSetup.signers,
+    safetyDepositSetup.transferAuthorityPair,
+    vaultAuthorityPair,
+  ];
+
+  try {
+    await transactionHandler.sendAndConfirmTransaction(tx, signers);
+  } catch (err) {
+    assertError(t, err, [/Add token to vault/i, /vault should be inactive/i]);
   }
 });
 

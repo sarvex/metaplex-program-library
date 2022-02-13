@@ -1,6 +1,6 @@
 import test from 'tape';
 
-import { assertInactiveVault, init, initInitVaultAccounts, killStuckProcess } from './utils';
+import { assertInactiveVault, init, setupInitVaultAccounts, killStuckProcess } from './utils';
 import {
   assertConfirmedTransaction,
   assertError,
@@ -13,7 +13,7 @@ killStuckProcess();
 
 test('init-vault: init vault allowing further share creation', async (t) => {
   const { transactionHandler, connection, payer, vaultAuthority } = await init();
-  const initVaultAccounts = await initInitVaultAccounts(
+  const initVaultAccounts = await setupInitVaultAccounts(
     t,
     connection,
     transactionHandler,
@@ -41,7 +41,7 @@ test('init-vault: init vault allowing further share creation', async (t) => {
 
 test('init-vault: init vault not allowing further share creation', async (t) => {
   const { transactionHandler, connection, payer, vaultAuthority } = await init();
-  const initVaultAccounts = await initInitVaultAccounts(
+  const initVaultAccounts = await setupInitVaultAccounts(
     t,
     connection,
     transactionHandler,
@@ -69,7 +69,7 @@ test('init-vault: init vault not allowing further share creation', async (t) => 
 
 test('init-vault: init vault twice for same account', async (t) => {
   const { transactionHandler, connection, payer, vaultAuthority } = await init();
-  const initVaultAccounts = await initInitVaultAccounts(
+  const initVaultAccounts = await setupInitVaultAccounts(
     t,
     connection,
     transactionHandler,
