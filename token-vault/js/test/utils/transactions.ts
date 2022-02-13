@@ -102,7 +102,7 @@ export async function initVault(
   await transactionHandler.sendAndConfirmTransaction(initVaultTx, []);
 
   const fractionMintAuthority = await pdaForVault(initVaultAccounts.vault);
-  addressLabels.addLabels({ fractionalMintAuthority: fractionMintAuthority });
+  addressLabels.addLabels({ fractionMintAuthority });
 
   return {
     connection,

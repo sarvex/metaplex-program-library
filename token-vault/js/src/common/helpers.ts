@@ -175,6 +175,10 @@ export function createUninitializedTokenAccount(
 // -----------------
 // PDA
 // -----------------
+/**
+ * Used to derive Vault PDA for a particular vault account.
+ * Used for `fractionMintAuthority`.
+ */
 export async function pdaForVault(vault: PublicKey) {
   const [vaultPDA] = await PublicKey.findProgramAddress(
     [Buffer.from(VAULT_PREFIX), VAULT_PROGRAM_PUBLIC_KEY.toBuffer(), vault.toBuffer()],

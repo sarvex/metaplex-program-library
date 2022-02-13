@@ -39,15 +39,21 @@ async function main() {
   // This is the payer account which should have sufficient amount of SOL
   const payer = await fundedPayer(connection);
   const vaultAuthority = Keypair.generate();
-  return initVault(connection, { payer, vaultAuthority }, addressLabels);
+  return initVault(
+    connection,
+    { payer, vaultAuthority, allowFurtherShareCreation: true },
+    addressLabels,
+  );
 }
 
 export async function initVault(
   connection: Connection,
-  { payer, vaultAuthority }: { payer: Keypair; vaultAuthority: Keypair },
+  args: { payer: Keypair; vaultAuthority: Keypair; allowFurtherShareCreation?: boolean },
   addressLabels: AddressLabels,
 ) {
-  addressLabels.addLabels({ payer, vaultAuthority });
+  addressLabels.findAndAddLabels(args);
+
+  const { payer, vaultAuthority, allowFurtherShareCreation = false } = args;
 
   // -----------------
   // 1. Setup Accounts to use when initializing the vault
@@ -78,7 +84,7 @@ export async function initVault(
   // 2. Using the accounts we setup above we can now initialize our vault
   // -----------------
   const initVaultIx = await InitVault.initVault(initVaultAccounts, {
-    allowFurtherShareCreation: true,
+    allowFurtherShareCreation,
   });
   const initVaulTx = new Transaction().add(initVaultIx);
   await sendAndConfirmTransaction(connection, initVaulTx, [payer]);
