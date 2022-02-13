@@ -1,6 +1,13 @@
 import test from 'tape';
 
-import { addressLabels, assertInactiveVault, initVault, killStuckProcess } from './utils';
+import {
+  addressLabels,
+  assertActiveVault,
+  assertInactiveVault,
+  initAndActivateVault,
+  initVault,
+  killStuckProcess,
+} from './utils';
 import { Transaction } from '@solana/web3.js';
 import {
   airdrop,
@@ -67,4 +74,34 @@ test('set authority: inactive vault', async (t) => {
       { allowFurtherShareCreation: true },
     );
   }
+});
+
+test('set authority: on active vault', async (t) => {
+  const {
+    transactionHandler,
+    connection,
+    accounts: initVaultAccounts,
+  } = await initAndActivateVault(t, { allowFurtherShareCreation: true });
+  const { vault, authority: vaultAuthority, vaultAuthorityPair } = initVaultAccounts;
+
+  addressLabels.addLabels(initVaultAccounts);
+
+  const [newAuthority] = addressLabels.genKeypair('newAuthority');
+  await airdrop(connection, newAuthority, 1);
+
+  const accounts: SetAuthorityInstructionAccounts = {
+    vault,
+    currentAuthority: vaultAuthority,
+    newAuthority,
+  };
+  const setAuthorityIx = createSetAuthorityInstruction(accounts);
+  const tx = new Transaction().add(setAuthorityIx);
+
+  const res = await transactionHandler.sendAndConfirmTransaction(tx, [vaultAuthorityPair]);
+  assertConfirmedTransaction(t, res.txConfirmed);
+  assertTransactionSummary(t, res.txSummary, {
+    msgRx: [/Set Authority/i, /success/i],
+  });
+
+  await assertActiveVault(t, connection, { ...initVaultAccounts, authority: newAuthority });
 });
