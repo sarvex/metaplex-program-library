@@ -967,17 +967,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metaplex-foundation/beet-solana@npm:0.0.0":
-  version: 0.0.0
-  resolution: "@metaplex-foundation/beet-solana@npm:0.0.0"
-  dependencies:
-    "@metaplex-foundation/beet": "*"
-    "@solana/web3.js": ^1.31.0
-  checksum: 84340fccba5708c032b06c986cd9e662252ea7b7e09a81a81dd62ad7e0986b7a9bb76d463e9c5bc487fee4c8e6a25f7aaea21c8478db9c07c8dfd6d1d7be8d7b
-  languageName: node
-  linkType: hard
-
-"@metaplex-foundation/beet-solana@npm:0.0.6, @metaplex-foundation/beet-solana@npm:^0.0.6":
+"@metaplex-foundation/beet-solana@npm:^0.0.6":
   version: 0.0.6
   resolution: "@metaplex-foundation/beet-solana@npm:0.0.6"
   dependencies:
@@ -987,17 +977,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metaplex-foundation/beet-solana@npm:^0.0.1":
-  version: 0.0.1
-  resolution: "@metaplex-foundation/beet-solana@npm:0.0.1"
-  dependencies:
-    "@metaplex-foundation/beet": "*"
-    "@solana/web3.js": ^1.31.0
-  checksum: cbe125def4bfaf079e7f263d028d5a5d082dfa08b687cedef4f8bad5a61a75e7cb3b9a3223309ee79b3edcc2e4fa06b7340be8e40e95744f87e13ee7b77f56a1
-  languageName: node
-  linkType: hard
-
-"@metaplex-foundation/beet@npm:*, @metaplex-foundation/beet@npm:0.0.7, @metaplex-foundation/beet@npm:>0.0.5, @metaplex-foundation/beet@npm:^0.0.7":
+"@metaplex-foundation/beet@npm:>0.0.5":
   version: 0.0.7
   resolution: "@metaplex-foundation/beet@npm:0.0.7"
   dependencies:
@@ -1005,32 +985,6 @@ __metadata:
     bn.js: ^5.2.0
     debug: ^4.3.3
   checksum: fdb5c44ce29c8a5ad01235a826707ecf3ab99b0c140027b6c3fa45891eec9fb1aaf1bb9d2be391a9db4f097ea321be67c0a54b1c646e03ac55907b3584fa95ba
-  languageName: node
-  linkType: hard
-
-"@metaplex-foundation/beet@npm:0.0.0":
-  version: 0.0.0
-  resolution: "@metaplex-foundation/beet@npm:0.0.0"
-  dependencies:
-    ansicolors: ^0.3.2
-    bn.js: ^5.2.0
-    bs58: ^4.0.1
-    debug: ^4.3.3
-    text-encoding-utf-8: ^1.0.2
-  checksum: 6fb1bfc180d66dd83c61f2e2fa6447e61c5cfc175e42b3e1e50c0e57b878f701515e805543f7aef1a25a457489dbf5e52312cd6efe14de6d083757f7db350a11
-  languageName: node
-  linkType: hard
-
-"@metaplex-foundation/beet@npm:^0.0.1":
-  version: 0.0.1
-  resolution: "@metaplex-foundation/beet@npm:0.0.1"
-  dependencies:
-    ansicolors: ^0.3.2
-    bn.js: ^5.2.0
-    bs58: ^4.0.1
-    debug: ^4.3.3
-    text-encoding-utf-8: ^1.0.2
-  checksum: 76dff12aabbd7b7c10dc940c696499ee6c4ab993a54accd9ed7a4c6f6f00f24d3084a941c4bcf36397fb7706e13f6598cbaab42b98b3a4ef1b8a0c513a916823
   languageName: node
   linkType: hard
 
@@ -1060,7 +1014,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@metaplex-foundation/metaplex-program-library@workspace:."
   dependencies:
-    "@metaplex-foundation/solita": 0.0.2
+    "@metaplex-foundation/solita": ^0.0.4
     "@project-serum/anchor": ^0.19.0
     "@types/mocha": ^9.0.0
     "@typescript-eslint/eslint-plugin": ^5.4.0
@@ -1081,8 +1035,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@metaplex-foundation/mpl-auction-house@workspace:auction-house/js"
   dependencies:
-    "@metaplex-foundation/beet": 0.0.7
-    "@metaplex-foundation/beet-solana": 0.0.6
+    "@metaplex-foundation/beet": ^0.0.8
+    "@metaplex-foundation/beet-solana": ^0.0.6
     "@metaplex-foundation/mpl-core": 0.0.2
     "@solana/web3.js": ^1.34.0
     "@types/tape": ^4.13.2
@@ -1110,8 +1064,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@metaplex-foundation/mpl-candy-machine@workspace:candy-machine/js"
   dependencies:
-    "@metaplex-foundation/beet": 0.0.0
-    "@metaplex-foundation/beet-solana": 0.0.0
+    "@metaplex-foundation/beet": ^0.0.8
+    "@metaplex-foundation/beet-solana": ^0.0.6
     "@solana/web3.js": ^1.34.0
     eslint: ^8.3.0
     prettier: ^2.5.1
@@ -1136,10 +1090,10 @@ __metadata:
   resolution: "@metaplex-foundation/mpl-fixed-price-sale@workspace:fixed-price-sale/js"
   dependencies:
     "@metaplex-foundation/amman": ^0.0.9
-    "@metaplex-foundation/beet": ^0.0.7
+    "@metaplex-foundation/beet": ^0.0.8
     "@metaplex-foundation/beet-solana": ^0.0.6
     "@metaplex-foundation/mpl-token-metadata": 1.1.0
-    "@metaplex-foundation/solita": ^0.0.2
+    "@metaplex-foundation/solita": ^0.0.4
     "@solana/spl-token": ^0.1.8
     "@solana/web3.js": ^1.34.0
     "@types/debug": ^4.1.7
@@ -1157,8 +1111,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@metaplex-foundation/mpl-gumdrop@workspace:gumdrop/js"
   dependencies:
-    "@metaplex-foundation/beet": ^0.0.1
-    "@metaplex-foundation/beet-solana": ^0.0.1
+    "@metaplex-foundation/beet": ^0.0.8
+    "@metaplex-foundation/beet-solana": ^0.0.6
     "@solana/web3.js": ^1.34.0
     "@types/tape": ^4.13.2
     eslint: ^8.3.0
@@ -1191,8 +1145,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@metaplex-foundation/mpl-token-entangler@workspace:token-entangler/js"
   dependencies:
-    "@metaplex-foundation/beet": 0.0.7
-    "@metaplex-foundation/beet-solana": 0.0.6
+    "@metaplex-foundation/beet": ^0.0.8
+    "@metaplex-foundation/beet-solana": ^0.0.6
     "@solana/web3.js": ^1.34.0
     "@types/tape": ^4.13.2
     eslint: ^8.3.0
@@ -1263,23 +1217,6 @@ __metadata:
     typescript: ^4.5.5
   languageName: unknown
   linkType: soft
-
-"@metaplex-foundation/solita@npm:0.0.2, @metaplex-foundation/solita@npm:^0.0.2":
-  version: 0.0.2
-  resolution: "@metaplex-foundation/solita@npm:0.0.2"
-  dependencies:
-    "@metaplex-foundation/beet": ^0.0.6
-    "@metaplex-foundation/beet-solana": ^0.0.6
-    "@solana/web3.js": ^1.31.0
-    camelcase: ^6.2.1
-    debug: ^4.3.3
-    js-sha256: ^0.9.0
-    prettier: ^2.5.1
-    snake-case: ^3.0.4
-    spok: ^1.4.3
-  checksum: 755e0b75f4c109a1a4e2f8c5b7608ef469c13740dfa71810938948f0521abeceb2e6da0b082ced170a8235c2033e3f416a4b11ecb4443b945bd5f0397707b04a
-  languageName: node
-  linkType: hard
 
 "@metaplex-foundation/solita@npm:^0.0.4":
   version: 0.0.4
