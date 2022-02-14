@@ -10,14 +10,21 @@ import {
 } from '../generated';
 import { InstructionsWithAccounts } from '../types';
 
+/**
+ * Exposes two methods essential to initializing a vault properly.
+ * @category Instructions
+ */
 export class InitVault {
   /**
-   * Sets up the accounts needed to initialize a vault.
+   * Sets up the accounts needed to conform to the conditions outlined in
+   * {@link InitVault.initVault} in order to initialize a vault with them.
    * Use this method if you don't have those accounts setup already.
    *
    * See {@link InitVaultInstructionAccounts} for more information about those accounts.
    * @param args
    *  - externalPriceAccount should be created via {@link import('./create-external-price-account').createExternalPriceAccount}
+   *
+   * @category Instructions
    */
   static async setupInitVaultAccounts(
     connection: Connection,
@@ -92,6 +99,56 @@ export class InitVault {
 
   /**
    * Initializes the Vault.
+   *
+   * ### Conditions for {@link InitVaultInstructionAccounts} accounts to Init a Vault
+   *
+   * When setting up the vault accounts via
+   * {@link InitVault.setupInitVaultAccounts} those conditions will be met.
+   *
+   * All accounts holding data need to be _initialized_ and _rent exempt_.
+   *
+   * #### Vault
+   *
+   * - owned by: Vault Program
+   * - is uninitialized
+   *
+   * #### pricingLookupAddress
+   *
+   * - provides: {@link ExternalPriceAccount} data
+   *
+   * #### fractionMint
+   *
+   * - owned by: Token Program
+   * - supply: 0
+   * - mintAuthority: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
+   * - freezeAuthority: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
+   *
+   * #### fractionTreasury
+   *
+   * - owned by: Token Program
+   * - amount: 0
+   * - owner: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
+   * - delegate: unset
+   * - closeAuthority: unset
+   * - mint: fractionMint address
+   *
+   * #### redeemTreasury
+   *
+   * - owned by: Token Program
+   * - amount: 0
+   * - owner: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
+   * - delegate: unset
+   * - closeAuthority: unset
+   * - mint: externalPriceAccount.priceMint (via pricingLookupAddress)
+   *
+   * ### Vault Account updates as Result of successfull Init
+   *
+   * - key: {@link Key}.VaultV1
+   * - accounts: addresses set to the provided accounts
+   * - tokenTypeCount: 0
+   * - state: {@link VaultState}.Inactive
+   *
+   * @category Instructions
    *
    * @param accounts set them up via {@link InitVault.setupInitVaultAccounts}
    */
