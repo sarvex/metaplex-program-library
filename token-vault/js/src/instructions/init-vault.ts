@@ -141,12 +141,15 @@ export class InitVault {
    * - closeAuthority: unset
    * - mint: externalPriceAccount.priceMint (via pricingLookupAddress)
    *
-   * ### Vault Account updates as Result of successfull Init
+   * ### Updates as Result of successfull Transaction
    *
-   * - key: {@link Key}.VaultV1
+   * #### vault
+   *
+   * - key: {@link Key.VaultV1}
    * - accounts: addresses set to the provided accounts
+   * - authority: set to authority account address
    * - tokenTypeCount: 0
-   * - state: {@link VaultState}.Inactive
+   * - state: {@link VaultState.Inactive}
    *
    * @category Instructions
    *

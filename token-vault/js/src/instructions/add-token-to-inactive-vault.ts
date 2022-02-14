@@ -218,6 +218,66 @@ export class SafetyDepositSetup {
  * added to a transaction to run prior to this instruction, see {@link SafetyDepositSetup.instructions}
  * and {@link SafetyDepositSetup.signers}.
  *
+ * ### Conditions for {@link AddTokenToInactiveVaultInstructionAccounts} accounts to add token to vault
+ *
+ * _Aside from the conditions outlined in detail in {@link InitVault.initVault}_ the following should hold:
+ *
+ * #### vault
+ *
+ * - state: {@link VaultState.Inactive}
+ *
+ * #### tokenAccount
+ *
+ * - owned by: Token Program
+ * - amount: > 0 and >= {@link SafetyDepositSetup.mintAmount}
+ * - mint: used to verify safetyDeposit PDA
+ *
+ * #### store
+ *
+ * - amount: 0
+ * - owner: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
+ * - delegate: unset
+ * - closeAuthority: unset
+ *
+ * #### transferAuthority
+ *
+ * - approved to transfer tokens from the tokenAccount
+ *
+ * #### vaultAuthority
+ *
+ * - address: matches vault.authority
+ *
+ * #### safetyDeposit
+ *
+ * - address: vault+tokenAccount.mint PDA (`[PREFIX, PROGRAM_ID, vault_address, tokenAccount.mint]`)
+ *
+ *
+ * ### Updates as a result of completing the Transaction
+ *
+ * #### safetyDeposit
+ *
+ * _The account to hold the data is created and data allocated_
+ *
+ * - key: {@link Key.SafetyDepositBoxV1}
+ * - vault: vault address
+ * - tokenMint: tokenAccount.mint
+ * - store: store address
+ * - order: vault.tokenTypeCount (0 based)
+ *
+ * #### vault
+ *
+ * - tokenTypeCount: increased by 1
+ *
+ * #### store
+ *
+ * - credit {@link SafetyDepositSetup.mintAmount} (transferred from tokenAccount)
+ *
+ * ### tokenAccount
+ *
+ * - debit {@link SafetyDepositSetup.mintAmount} (transferred to store)
+ *
+ * @category Instructions
+ *
  * @param safetyDepositSetup created via {@link SafetyDepositSetup.create}
  * @param ixAccounts
  * @param ixAccounts.payer funding the transaction
