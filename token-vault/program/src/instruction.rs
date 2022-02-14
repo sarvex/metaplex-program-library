@@ -76,7 +76,7 @@ pub enum VaultInstruction {
     #[account(0, writable, name="vault", desc = "Initialized inactivated fractionalized token vault")]
     #[account(1, writable, name="fraction_mint", desc = "Fraction mint")]
     #[account(2, writable, name="fraction_treasury", desc = "Fraction treasury")]
-    #[account(3, name="fractional_mint_authority", desc = "Fraction mint authority for the program - seed of [PREFIX, program_id]")]
+    #[account(3, name="fraction_mint_authority", desc = "Fraction mint authority for the program - seed of [PREFIX, program_id]")]
     #[account(4, signer, name="vault_authority", desc = "Authority on the vault")]
     #[account(5, name="token_program", desc = "Token program")]
     ActivateVault(NumberOfShareArgs),
