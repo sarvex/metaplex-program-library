@@ -2,6 +2,7 @@
   "entryPoints": ["src/mpl-token-vault.ts"],
   "excludeInternal": true,
   "excludePrivate": true,
+  "categorizeByGroup": false,
   "readme": "none",
   "emit": "both",
   "out": "./docs"

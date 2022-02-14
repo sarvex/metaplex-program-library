@@ -40,8 +40,7 @@ import { InstructionsWithAccounts } from '../types';
  * The {@link SafetyDepositSetup} is then provided to {@link addTokenToInactiveVault}
  * in order to create the instruction to add the tokens to the vault.
  *
- * @category Instructions
- * @category AddTokenToInactiveVault
+ * @category AddTokenToInactiveVault:Instructions
  */
 export class SafetyDepositSetup {
   private constructor(
@@ -279,8 +278,7 @@ export class SafetyDepositSetup {
  *
  * - debit {@link SafetyDepositSetup.mintAmount} (transferred to store)
  *
- * @category Instructions
- * @category AddTokenToInactiveVault
+ * @category AddTokenToInactiveVault:Instructions
  *
  * @param safetyDepositSetup created via {@link SafetyDepositSetup.create}
  * @param ixAccounts
@@ -319,8 +317,7 @@ export async function addTokenToInactiveVault(
  * Please {@see addTokenToInactiveVault} for a more intuitive way to set up
  * this instruction and required accounts.
  *
- * @category Instructions
- * @category AddTokenToInactiveVault
+ * @category AddTokenToInactiveVault:Instructions
  */
 export async function addTokenToInactiveVaultDirect(
   amountArgs: AmountArgs,

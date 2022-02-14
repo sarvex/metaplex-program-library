@@ -14,8 +14,7 @@ import { InstructionsWithAccounts } from '../types';
  * instruction.
  * It uses {@link QUOTE_MINT} as its `priceMint`.
  *
- * @category Instructions
- * @category CreateExternalPriceAccount
+ * @category CreateExternalPriceAccount:Instructions
  */
 export async function createExternalPriceAccount(
   connection: Connection,
