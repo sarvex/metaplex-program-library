@@ -1,5 +1,4 @@
 import { strict as assert } from 'assert';
-import { AccountLayout as TokenAccountLayout } from '@solana/spl-token';
 import {
   Connection,
   Keypair,
@@ -11,12 +10,11 @@ import {
 import { VAULT_PREFIX, VAULT_PROGRAM_PUBLIC_KEY } from '../common/consts';
 import {
   mintTokens,
-  createTokenAccount,
   createMint,
   getMintRentExempt,
   createAssociatedTokenAccount,
   approveTokenTransfer,
-  pdaForVault,
+  createVaultOwnedTokenAccount,
 } from '../common/helpers';
 import { getMint } from '../common/helpers.mint';
 import {
@@ -24,7 +22,6 @@ import {
   AmountArgs,
   createAddTokenToInactiveVaultInstruction,
 } from '../generated';
-import { InstructionsWithAccounts } from '../types';
 
 /**
  * Allows to setup a safety deposit box and all related accounts easily.
@@ -172,12 +169,8 @@ export class SafetyDepositSetup {
     // -----------------
     // Store Account
     // -----------------
-    const [createStoreIxs, createStoreSigners, { storeAccount }] = await createStoreAccount(
-      connection,
-      payer,
-      vault,
-      tokenMint,
-    );
+    const [createStoreIxs, createStoreSigners, { tokenAccount: storeAccount }] =
+      await createVaultOwnedTokenAccount(connection, payer, vault, tokenMint);
     instructions.push(...createStoreIxs);
     signers.push(...createStoreSigners);
 
@@ -334,25 +327,6 @@ export async function addTokenToInactiveVaultDirect(
 // -----------------
 // Helpers
 // -----------------
-async function createStoreAccount(
-  connection: Connection,
-  payer: PublicKey,
-  vault: PublicKey,
-  tokenMint: PublicKey,
-): Promise<InstructionsWithAccounts<{ storeAccount: PublicKey }>> {
-  const vaultPDA = await pdaForVault(vault);
-  const tokenAccountRentExempt = await connection.getMinimumBalanceForRentExemption(
-    TokenAccountLayout.span,
-  );
-  const [instructions, signers, { tokenAccount: storeAccount }] = createTokenAccount(
-    payer,
-    tokenAccountRentExempt,
-    tokenMint, // mint
-    vaultPDA, // owner
-  );
-  return [instructions, signers, { storeAccount }];
-}
-
 async function getSafetyDepositAccount(vault: PublicKey, tokenMint: PublicKey): Promise<PublicKey> {
   const [pda] = await PublicKey.findProgramAddress(
     [Buffer.from(VAULT_PREFIX), vault.toBuffer(), tokenMint.toBuffer()],

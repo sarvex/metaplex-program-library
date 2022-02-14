@@ -32,7 +32,7 @@ export function approveTokenTransfer({
 }: {
   tokenAccount: PublicKey;
   owner: PublicKey;
-  amount: number;
+  amount: bignum;
 }): [TransactionInstruction, Keypair] {
   const transferAuthority = Keypair.generate();
   const createApproveIx = Token.createApproveInstruction(
@@ -173,8 +173,27 @@ export function createUninitializedTokenAccount(
 }
 
 // -----------------
-// PDA
+// PDA / Vault
 // -----------------
+export async function createVaultOwnedTokenAccount(
+  connection: Connection,
+  payer: PublicKey,
+  vault: PublicKey,
+  tokenMint: PublicKey,
+): Promise<InstructionsWithAccounts<{ tokenAccount: PublicKey }>> {
+  const vaultPDA = await pdaForVault(vault);
+  const tokenAccountRentExempt = await connection.getMinimumBalanceForRentExemption(
+    TokenAccountLayout.span,
+  );
+  const [instructions, signers, { tokenAccount }] = createTokenAccount(
+    payer,
+    tokenAccountRentExempt,
+    tokenMint, // mint
+    vaultPDA, // owner
+  );
+  return [instructions, signers, { tokenAccount }];
+}
+
 /**
  * Used to derive Vault PDA for a particular vault account.
  * Used for `fractionMintAuthority`.
