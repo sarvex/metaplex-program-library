@@ -23,14 +23,14 @@ const ActivateVaultStruct = new beet.BeetArgsStruct<
  * @property [writable] vault Initialized inactivated fractionalized token vault
  * @property [writable] fractionMint Fraction mint
  * @property [writable] fractionTreasury Fraction treasury
- * @property [] fractionalMintAuthority Fraction mint authority for the program - seed of [PREFIX, program_id]
+ * @property [] fractionMintAuthority Fraction mint authority for the program - seed of [PREFIX, program_id]
  * @property [signer] vaultAuthority Authority on the vault
  */
 export type ActivateVaultInstructionAccounts = {
   vault: web3.PublicKey;
   fractionMint: web3.PublicKey;
   fractionTreasury: web3.PublicKey;
-  fractionalMintAuthority: web3.PublicKey;
+  fractionMintAuthority: web3.PublicKey;
   vaultAuthority: web3.PublicKey;
 };
 
@@ -46,13 +46,7 @@ export function createActivateVaultInstruction(
   accounts: ActivateVaultInstructionAccounts,
   args: ActivateVaultInstructionArgs,
 ) {
-  const {
-    vault,
-    fractionMint,
-    fractionTreasury,
-    fractionalMintAuthority,
-    vaultAuthority,
-  } = accounts;
+  const { vault, fractionMint, fractionTreasury, fractionMintAuthority, vaultAuthority } = accounts;
 
   const [data] = ActivateVaultStruct.serialize({
     instructionDiscriminator: activateVaultInstructionDiscriminator,
@@ -75,7 +69,7 @@ export function createActivateVaultInstruction(
       isSigner: false,
     },
     {
-      pubkey: fractionalMintAuthority,
+      pubkey: fractionMintAuthority,
       isWritable: false,
       isSigner: false,
     },

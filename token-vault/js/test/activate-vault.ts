@@ -133,7 +133,7 @@ test('activate vault: inactive vault with no tokens added activate providing inv
     vaultAuthority,
     fractionMint,
     fractionTreasury,
-    fractionalMintAuthority: payer,
+    fractionMintAuthority: payer,
   };
 
   const activateVaultIx = await activateVault(vault, accounts, NUMBER_OF_SHARES);

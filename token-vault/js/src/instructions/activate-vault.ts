@@ -12,6 +12,8 @@ import type { Optional } from 'utility-types';
  * @property [writable] vault Initialized inactivated fractionalized token vault
  * @property [writable] fractionMint Fraction mint
  * @property [writable] fractionTreasury Fraction treasury
+ * @property [] fractionalMintAuthority Fraction mint authority for the program
+ *           seed of [PREFIX, program_id] (optional)
  * @property [signer] vaultAuthority Authority on the vault
  */
 export type ActivateVaultAccounts = Optional<
@@ -23,7 +25,7 @@ export type ActivateVaultAccounts = Optional<
  * Activates the vault and as part of that mints {@link numberOfShares} to the
  * {@link ActivateVaultInstructionAccounts['fractionTreasury']}.
  *
- * Unless provided the {@link ActivateVaultInstructionAccounts['fractionalMintAuthority']}
+ * Unless provided the {@link ActivateVaultInstructionAccounts.fractionMintAuthority}
  * is derived from the `vault` key
  */
 export async function activateVault(
@@ -31,9 +33,9 @@ export async function activateVault(
   accounts: ActivateVaultAccounts,
   numberOfShares: bignum,
 ) {
-  const fractionalMintAuthority = accounts.fractionalMintAuthority ?? (await pdaForVault(vault));
+  const fractionMintAuthority = accounts.fractionMintAuthority ?? (await pdaForVault(vault));
   return createActivateVaultInstruction(
-    { ...accounts, fractionalMintAuthority },
+    { ...accounts, fractionMintAuthority },
     { numberOfShareArgs: { numberOfShares } },
   );
 }
