@@ -12,7 +12,9 @@ import { InstructionsWithAccounts } from '../types';
 
 /**
  * Exposes two methods essential to initializing a vault properly.
+ *
  * @category Instructions
+ * @category InitVault
  */
 export class InitVault {
   /**
@@ -25,6 +27,7 @@ export class InitVault {
    *  - externalPriceAccount should be created via {@link import('./create-external-price-account').createExternalPriceAccount}
    *
    * @category Instructions
+   * @category InitVault
    */
   static async setupInitVaultAccounts(
     connection: Connection,
@@ -152,6 +155,7 @@ export class InitVault {
    * - state: {@link VaultState.Inactive}
    *
    * @category Instructions
+   * @category InitVault
    *
    * @param accounts set them up via {@link InitVault.setupInitVaultAccounts}
    */

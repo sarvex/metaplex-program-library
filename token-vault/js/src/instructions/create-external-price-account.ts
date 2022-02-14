@@ -9,6 +9,14 @@ import {
 import { QUOTE_MINT, VAULT_PROGRAM_ID } from '../mpl-token-vault';
 import { InstructionsWithAccounts } from '../types';
 
+/**
+ * Creates the external price account needed for the {@link initVault}
+ * instruction.
+ * It uses {@link QUOTE_MINT} as its `priceMint`.
+ *
+ * @category Instructions
+ * @category CreateExternalPriceAccount
+ */
 export async function createExternalPriceAccount(
   connection: Connection,
   payer: PublicKey,

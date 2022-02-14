@@ -39,6 +39,9 @@ import { InstructionsWithAccounts } from '../types';
  *
  * The {@link SafetyDepositSetup} is then provided to {@link addTokenToInactiveVault}
  * in order to create the instruction to add the tokens to the vault.
+ *
+ * @category Instructions
+ * @category AddTokenToInactiveVault
  */
 export class SafetyDepositSetup {
   private constructor(
@@ -277,6 +280,7 @@ export class SafetyDepositSetup {
  * - debit {@link SafetyDepositSetup.mintAmount} (transferred to store)
  *
  * @category Instructions
+ * @category AddTokenToInactiveVault
  *
  * @param safetyDepositSetup created via {@link SafetyDepositSetup.create}
  * @param ixAccounts
@@ -308,6 +312,28 @@ export async function addTokenToInactiveVault(
   });
 }
 
+/**
+ * Advanced version to add tokens to inactive vault.
+ * It requires all {@link accounts} to be set up properly
+ *
+ * Please {@see addTokenToInactiveVault} for a more intuitive way to set up
+ * this instruction and required accounts.
+ *
+ * @category Instructions
+ * @category AddTokenToInactiveVault
+ */
+export async function addTokenToInactiveVaultDirect(
+  amountArgs: AmountArgs,
+  accounts: Omit<AddTokenToInactiveVaultInstructionAccounts, 'systemAccount'>,
+) {
+  const instructionAccounts: AddTokenToInactiveVaultInstructionAccounts = {
+    ...accounts,
+    systemAccount: SystemProgram.programId,
+  };
+
+  return createAddTokenToInactiveVaultInstruction(instructionAccounts, { amountArgs });
+}
+
 // -----------------
 // Helpers
 // -----------------
@@ -336,16 +362,4 @@ async function getSafetyDepositAccount(vault: PublicKey, tokenMint: PublicKey): 
     VAULT_PROGRAM_PUBLIC_KEY,
   );
   return pda;
-}
-
-export async function addTokenToInactiveVaultDirect(
-  amountArgs: AmountArgs,
-  accounts: Omit<AddTokenToInactiveVaultInstructionAccounts, 'systemAccount'>,
-) {
-  const instructionAccounts: AddTokenToInactiveVaultInstructionAccounts = {
-    ...accounts,
-    systemAccount: SystemProgram.programId,
-  };
-
-  return createAddTokenToInactiveVaultInstruction(instructionAccounts, { amountArgs });
 }

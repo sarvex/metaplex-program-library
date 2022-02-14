@@ -15,18 +15,50 @@ import type { Optional } from 'utility-types';
  * @property [] fractionalMintAuthority Fraction mint authority for the program
  *           seed of [PREFIX, program_id] (optional)
  * @property [signer] vaultAuthority Authority on the vault
+ *
+ * @category Accounts
+ * @category ActivateVault
  */
 export type ActivateVaultAccounts = Optional<
   ActivateVaultInstructionAccounts,
-  'fractionalMintAuthority'
+  'fractionMintAuthority'
 >;
 
 /**
  * Activates the vault and as part of that mints {@link numberOfShares} to the
- * {@link ActivateVaultInstructionAccounts['fractionTreasury']}.
+ * {@link ActivateVaultInstructionAccounts.fractionTreasury}.
  *
  * Unless provided the {@link ActivateVaultInstructionAccounts.fractionMintAuthority}
  * is derived from the `vault` key
+ *
+ * ### Conditions for {@link ActivateVaultInstructionAccounts} accounts to add token to vault
+ *
+ * _Aside from the conditions outlined in detail in {@link InitVault.initVault}_ the following should hold:
+ *
+ * #### vault
+ *
+ * - state: {@link VaultState.Inactive}
+ *
+ * ### fractionalMintAuthority
+ *
+ * - address: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
+ *
+ * ### Updates as Result of successfull Transaction
+ *
+ * #### vault
+ *
+ * - state: {@link VaultState.Active}
+ *
+ * ### fractionTreasury
+ *
+ * - credit {@link numberOfShares} (minted from fractionMint)
+ *
+ * #### fractionMint
+ *
+ * - mints {@link numberOfShares} to fractionTreasury
+ *
+ * @category Instructions
+ * @category ActivateVault
  */
 export async function activateVault(
   vault: PublicKey,
