@@ -131,10 +131,17 @@ export function createUninitializedMint(
 export function mintTokens(
   mint: PublicKey,
   tokenAccount: PublicKey,
-  payer: PublicKey,
+  mintAuthority: PublicKey,
   amount: bignum,
 ): TransactionInstruction {
-  return Token.createMintToInstruction(TOKEN_PROGRAM_ID, mint, tokenAccount, payer, [], amount);
+  return Token.createMintToInstruction(
+    TOKEN_PROGRAM_ID,
+    mint,
+    tokenAccount,
+    mintAuthority,
+    [],
+    amount,
+  );
 }
 
 export function getTokenRentExempt(connection: Connection) {
