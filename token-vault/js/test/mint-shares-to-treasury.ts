@@ -3,9 +3,7 @@ import test from 'tape';
 import {
   Account,
   addressLabels,
-  assertIsNotNull,
   getAccount,
-  getVault,
   initAndActivateVault,
   initVault,
   killStuckProcess,
@@ -15,21 +13,10 @@ import {
 import { Signer, Transaction } from '@solana/web3.js';
 import {
   assertConfirmedTransaction,
+  assertError,
   assertTransactionSummary,
   tokenBalanceFor,
-  tokenBalancesOfTransaction,
 } from '@metaplex-foundation/amman';
-import {
-  addSharesToTreasury,
-  AddSharesToTreasurySetup,
-} from '../src/instructions/add-shares-to-treasury';
-import { getMint } from '../src/common/helpers.mint';
-import {
-  activateVault,
-  ActivateVaultAccounts,
-  addTokenToInactiveVault,
-  SafetyDepositSetup,
-} from '../src/instructions';
 import { mintSharesToTreasury } from '../src/instructions/mint-shares-to-treasury';
 import { MintFractionalSharesInstructionAccounts } from '../src/mpl-token-vault';
 import spok, { Specifications } from 'spok';
@@ -109,4 +96,87 @@ test('mint shares: active vault which allows further share creation, mint variou
   await runAndVerify(0, 0);
   await runAndVerify(5, 0);
   await runAndVerify(new BN('5000000000' /* 5,000,000,000 */), 5);
+});
+
+test('mint shares: active vault which does not all further share creation, fails', async (t) => {
+  // -----------------
+  // Init and Activate Vault
+  // -----------------
+  const { transactionHandler, accounts: initVaultAccounts } = await initAndActivateVault(t, {
+    allowFurtherShareCreation: false,
+  });
+  const {
+    vault,
+    authority: vaultAuthority,
+    vaultAuthorityPair,
+    fractionMint,
+    fractionTreasury,
+    fractionMintAuthority,
+  } = initVaultAccounts;
+
+  addressLabels.addLabels(initVaultAccounts);
+
+  // -----------------
+  // Mint Shares
+  // -----------------
+  const accounts: MintFractionalSharesInstructionAccounts = {
+    fractionTreasury,
+    fractionMint,
+    vault,
+    vaultAuthority,
+    mintAuthority: fractionMintAuthority,
+  };
+  const signers: Signer[] = [vaultAuthorityPair];
+
+  const mintSharesIx = mintSharesToTreasury(accounts, 1);
+
+  const tx = new Transaction().add(mintSharesIx);
+  try {
+    await transactionHandler.sendAndConfirmTransaction(tx, signers);
+  } catch (err) {
+    assertError(t, err, [
+      /Mint new fractional shares/i,
+      /vault does not allow the minting of new shares/i,
+    ]);
+  }
+});
+
+test('mint shares: inactive vault, fails', async (t) => {
+  // -----------------
+  // Init Vault
+  // -----------------
+  const { transactionHandler, accounts: initVaultAccounts } = await initVault(t, {
+    allowFurtherShareCreation: true,
+  });
+  const {
+    vault,
+    authority: vaultAuthority,
+    vaultAuthorityPair,
+    fractionMint,
+    fractionTreasury,
+    fractionMintAuthority,
+  } = initVaultAccounts;
+
+  addressLabels.addLabels(initVaultAccounts);
+
+  // -----------------
+  // Mint Shares
+  // -----------------
+  const accounts: MintFractionalSharesInstructionAccounts = {
+    fractionTreasury,
+    fractionMint,
+    vault,
+    vaultAuthority,
+    mintAuthority: fractionMintAuthority,
+  };
+  const signers: Signer[] = [vaultAuthorityPair];
+
+  const mintSharesIx = mintSharesToTreasury(accounts, 1);
+
+  const tx = new Transaction().add(mintSharesIx);
+  try {
+    await transactionHandler.sendAndConfirmTransaction(tx, signers);
+  } catch (err) {
+    assertError(t, err, [/Mint new fractional shares/i, /vault should be active/i]);
+  }
 });
