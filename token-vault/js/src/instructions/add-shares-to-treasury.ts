@@ -1,7 +1,17 @@
 import { bignum } from '@metaplex-foundation/beet';
 import { Connection, Keypair, PublicKey, Signer, TransactionInstruction } from '@solana/web3.js';
 import { strict as assert } from 'assert';
-import { approveTokenTransfer, createVaultOwnedTokenAccount, mintTokens } from '../common/helpers';
+import {
+  approveTokenTransfer,
+  createAssociatedTokenAccount,
+  createMint,
+  createTokenAccount,
+  createVaultOwnedTokenAccount,
+  getTokenRentExempt,
+  mintTokens,
+  pdaForVault,
+} from '../common/helpers';
+import { getMint } from '../common/helpers.mint';
 import {
   AddSharesToTreasuryInstructionAccounts,
   AddSharesToTreasuryInstructionArgs,
@@ -42,26 +52,55 @@ export class AddSharesToTreasurySetup {
 
   initSourceAccount = async () => {
     assert(this.source == null, 'source was already provided');
-    const [createSourceIxs, createSourceSigners, { tokenAccount: source }] =
+    /*
+    const [createSourceIxs, createSourceSigners, { tokenAccount }] = createTokenAccount(
+      this.payer,
+      sourceRentExempt,
+      this.fractionMint,
+      this.payer,
+    );
+    */
+
+    /*
+    const [createSourceIxs, createSourceSigners, { tokenAccount }] =
       await createVaultOwnedTokenAccount(
         this.connection,
         this.payer,
         this.vault,
         this.fractionMint,
       );
+    */
+
+    const [createSourceIx, tokenAccount] = await createAssociatedTokenAccount({
+      tokenMint: this.fractionMint,
+      tokenOwner: this.payer,
+      payer: this.payer,
+    });
+    const createSourceIxs = [createSourceIx];
+    const createSourceSigners: Signer[] = [];
+
     this.instructions.push(...createSourceIxs);
     this.signers.push(...createSourceSigners);
-    this.source = source;
+    this.source = tokenAccount;
 
     return this;
   };
 
   mintSharesToSource = async () => {
     assert(this.source != null, 'init source first via initSourceAccount');
+
+    const mintAuthority = await pdaForVault(this.vault);
+    const mint = await getMint(this.connection, this.fractionMint);
+    assert(mint.mintAuthority != null, 'fractionMint should have mint authority');
+    assert(
+      new PublicKey(mint.mintAuthority).equals(mintAuthority),
+      'fractionMint mint authority should match mint authority derived from vault PDA',
+    );
+
     const mintTokensIx = mintTokens(
       this.fractionMint,
       this.source,
-      this.payer,
+      mintAuthority,
       this.numberOfShares,
     );
     this.instructions.push(mintTokensIx);
@@ -91,6 +130,7 @@ export class AddSharesToTreasurySetup {
     args: {
       payer: PublicKey;
       vault: PublicKey;
+      vaultAuthority: PublicKey;
       fractionTreasury: PublicKey;
       fractionMint: PublicKey;
       numberOfShares: bignum;
