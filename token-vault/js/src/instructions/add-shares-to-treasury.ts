@@ -1,13 +1,16 @@
+// TODO(thlorenz): WIP revisit once we have mint shares implemented
 import { bignum } from '@metaplex-foundation/beet';
 import { Connection, Keypair, PublicKey, Signer, TransactionInstruction } from '@solana/web3.js';
 import { strict as assert } from 'assert';
 import {
   approveTokenTransfer,
+  /*
   createAssociatedTokenAccount,
   createMint,
   createTokenAccount,
   createVaultOwnedTokenAccount,
   getTokenRentExempt,
+  */
   mintTokens,
   pdaForVault,
 } from '../common/helpers';
@@ -50,8 +53,9 @@ export class AddSharesToTreasurySetup {
     public transferAuthorityPair?: Keypair,
   ) {}
 
-  initSourceAccount = async () => {
+  initSourceAccount = async (source: PublicKey) => {
     assert(this.source == null, 'source was already provided');
+    this.source = source;
     /*
     const [createSourceIxs, createSourceSigners, { tokenAccount }] = createTokenAccount(
       this.payer,
@@ -71,6 +75,7 @@ export class AddSharesToTreasurySetup {
       );
     */
 
+    /*
     const [createSourceIx, tokenAccount] = await createAssociatedTokenAccount({
       tokenMint: this.fractionMint,
       tokenOwner: this.payer,
@@ -78,10 +83,13 @@ export class AddSharesToTreasurySetup {
     });
     const createSourceIxs = [createSourceIx];
     const createSourceSigners: Signer[] = [];
+    */
 
+    /*
     this.instructions.push(...createSourceIxs);
     this.signers.push(...createSourceSigners);
     this.source = tokenAccount;
+    */
 
     return this;
   };
@@ -114,11 +122,12 @@ export class AddSharesToTreasurySetup {
     assert(this.transferAuthorityPair == null, 'transferAuthorityPair was already provided');
 
     const [approveTransferIx, transferAuthorityPair] = approveTokenTransfer({
-      owner: this.payer,
-      tokenAccount: this.source,
+      owner: this.source,
+      tokenAccount: this.fractionTreasury,
       amount: this.numberOfShares,
     });
     this.instructions.push(approveTransferIx);
+    this.signers.push(transferAuthorityPair);
     this.transferAuthority = transferAuthorityPair.publicKey;
     this.transferAuthorityPair = transferAuthorityPair;
 
@@ -192,6 +201,6 @@ export async function addSharesToTreasury(
   };
 
   const ix = createAddSharesToTreasuryInstruction(accounts, args);
-  const signers = [setup.transferAuthorityPair];
+  const signers: Signer[] = [];
   return [[ix], signers];
 }
