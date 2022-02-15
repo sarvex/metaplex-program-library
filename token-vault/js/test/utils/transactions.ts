@@ -83,10 +83,7 @@ export async function setupInitVaultAccounts(
   return initVaultAccounts;
 }
 
-export async function initVault(
-  t: Test,
-  args: { allowFurtherShareCreation: boolean } = { allowFurtherShareCreation: false },
-) {
+export async function initVault(t: Test, args: { allowFurtherShareCreation?: boolean } = {}) {
   const { transactionHandler, connection, payer, payerPair, vaultAuthority, vaultAuthorityPair } =
     await init();
   const initVaultAccounts = await setupInitVaultAccounts(
@@ -96,7 +93,10 @@ export async function initVault(
     payer,
     vaultAuthority,
   );
-  const initVaultIx = await InitVault.initVault(initVaultAccounts, args);
+  const { allowFurtherShareCreation = false } = args;
+  const initVaultIx = await InitVault.initVault(initVaultAccounts, {
+    allowFurtherShareCreation,
+  });
 
   const initVaultTx = new Transaction().add(initVaultIx);
   await transactionHandler.sendAndConfirmTransaction(initVaultTx, []);
@@ -119,12 +119,10 @@ export async function initVault(
 
 export async function initAndActivateVault(
   t: Test,
-  args: { allowFurtherShareCreation: boolean; numberOfShares?: number } = {
-    allowFurtherShareCreation: false,
-  },
+  args: { allowFurtherShareCreation?: boolean; numberOfShares?: number } = {},
 ) {
   const { numberOfShares = 0 } = args;
-  const { transactionHandler, connection, accounts: initVaultAccounts } = await initVault(t);
+  const { transactionHandler, connection, accounts: initVaultAccounts } = await initVault(t, args);
   const {
     vault,
     authority: vaultAuthority,

@@ -4,10 +4,11 @@ import { AddressLabels } from '@metaplex-foundation/amman';
 import debug from 'debug';
 import { VAULT_PROGRAM_ID } from '../../src/mpl-token-vault';
 
+export * from './accounts';
 export * from './asserts';
-export * from './vault-asserts';
 export * from './token';
 export * from './transactions';
+export * from './vault-asserts';
 
 export const logError = debug('vault:test:error');
 export const logInfo = debug('vault:test:info');
