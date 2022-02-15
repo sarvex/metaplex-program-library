@@ -153,30 +153,37 @@ export function createTokenAccount(
   accountRentExempt: number,
   mint: PublicKey,
   owner: PublicKey,
-): [TransactionInstruction[], Signer[], { tokenAccount: PublicKey }] {
-  const [createAccountIx, signer, account] = createUninitializedTokenAccount(
-    payer,
-    accountRentExempt,
+): InstructionsWithAccounts<{ tokenAccountPair: Keypair; tokenAccount: PublicKey }> {
+  const [createAccountIx, signer, { tokenAccountPair, tokenAccount }] =
+    createUninitializedTokenAccount(payer, accountRentExempt);
+  const initAccountIx = Token.createInitAccountInstruction(
+    TOKEN_PROGRAM_ID,
+    mint,
+    tokenAccount,
+    owner,
   );
-  const initAccountIx = Token.createInitAccountInstruction(TOKEN_PROGRAM_ID, mint, account, owner);
 
-  return [[createAccountIx, initAccountIx], [signer], { tokenAccount: account }];
+  return [[createAccountIx, initAccountIx], [signer], { tokenAccountPair, tokenAccount }];
 }
 
 export function createUninitializedTokenAccount(
   payer: PublicKey,
   amount: number,
-): [TransactionInstruction, Signer, PublicKey] {
-  const tokenAccount = Keypair.generate();
+): [TransactionInstruction, Signer, { tokenAccountPair: Keypair; tokenAccount: PublicKey }] {
+  const tokenAccountPair = Keypair.generate();
   const instruction = SystemProgram.createAccount({
     fromPubkey: payer,
-    newAccountPubkey: tokenAccount.publicKey,
+    newAccountPubkey: tokenAccountPair.publicKey,
     lamports: amount,
     space: TokenAccountLayout.span,
     programId: TOKEN_PROGRAM_ID,
   });
 
-  return [instruction, tokenAccount, tokenAccount.publicKey];
+  return [
+    instruction,
+    tokenAccountPair,
+    { tokenAccountPair, tokenAccount: tokenAccountPair.publicKey },
+  ];
 }
 
 // -----------------
