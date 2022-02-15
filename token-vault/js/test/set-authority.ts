@@ -103,5 +103,15 @@ test('set authority: on active vault', async (t) => {
     msgRx: [/Set Authority/i, /success/i],
   });
 
-  await assertActiveVault(t, connection, { ...initVaultAccounts, authority: newAuthority });
+  await assertActiveVault(
+    t,
+    connection,
+    {
+      ...initVaultAccounts,
+      authority: newAuthority,
+    },
+    {
+      allowFurtherShareCreation: true,
+    },
+  );
 });
