@@ -184,7 +184,7 @@ export class SafetyDepositSetup {
     // -----------------
     const [approveTransferIx, transferAuthorityPair] = approveTokenTransfer({
       owner: payer,
-      tokenAccount,
+      sourceAccount: tokenAccount,
       amount: args.mintAmount,
     });
     instructions.push(approveTransferIx);

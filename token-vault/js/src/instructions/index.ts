@@ -1,4 +1,5 @@
 export * from './activate-vault';
+export * from './add-shares-to-treasury';
 export * from './add-token-to-inactive-vault';
 export * from './combine-vault';
 export * from './create-external-price-account';

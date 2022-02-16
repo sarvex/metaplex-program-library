@@ -12,7 +12,7 @@ import { InstructionsWithAccounts } from '../types';
  * Sets up a token account and required instructions that can be used as the
  * {@link WithdrawSharesFromTreasuryInstructionAccounts.destination}.
  */
-export async function createWithdrawDestinationAccount(
+export async function setupWithdrawDestinationAccount(
   connection: Connection,
   args: {
     payer: PublicKey;
@@ -51,7 +51,7 @@ export type WithdrawSharesFromTreasuryAccounts = Omit<
  *
  * - mint: vault.fractionMint
  *
- * _set this up via {@link createWithdrawDestinationAccount}_
+ * _set this up via {@link setupWithdrawDestinationAccount}_
  *
  * #### fractionMint
  *

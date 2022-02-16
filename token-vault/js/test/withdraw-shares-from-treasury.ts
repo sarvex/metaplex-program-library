@@ -22,7 +22,7 @@ import spok, { Specifications } from 'spok';
 import { bignum } from '@metaplex-foundation/beet';
 import BN from 'bn.js';
 import {
-  createWithdrawDestinationAccount,
+  setupWithdrawDestinationAccount,
   withdrawSharesFromTreasury,
   WithdrawSharesFromTreasuryAccounts,
 } from '../src/instructions/withdraw-shares-from-treasury';
@@ -74,7 +74,7 @@ test('withdraw shares: active vault which minted sufficient shares, withdraw var
   // Create Destination Account
   // -----------------
   const [createDestinationIxs, createDestinationSigners, { destination }] =
-    await createWithdrawDestinationAccount(connection, { payer, fractionMint });
+    await setupWithdrawDestinationAccount(connection, { payer, fractionMint });
   {
     const tx = new Transaction().add(...createDestinationIxs);
     const res = await transactionHandler.sendAndConfirmTransaction(tx, createDestinationSigners);
@@ -183,7 +183,7 @@ test('withdraw shares: inactive vault, fails', async (t) => {
   // Create Destination Account
   // -----------------
   const [createDestinationIxs, createDestinationSigners, { destination }] =
-    await createWithdrawDestinationAccount(connection, { payer, fractionMint });
+    await setupWithdrawDestinationAccount(connection, { payer, fractionMint });
   {
     const tx = new Transaction().add(...createDestinationIxs);
     const res = await transactionHandler.sendAndConfirmTransaction(tx, createDestinationSigners);
@@ -258,7 +258,7 @@ test('withdraw shares: active vault which minted 99 shares, withdraw 100', async
   // Create Destination Account
   // -----------------
   const [createDestinationIxs, createDestinationSigners, { destination }] =
-    await createWithdrawDestinationAccount(connection, { payer, fractionMint });
+    await setupWithdrawDestinationAccount(connection, { payer, fractionMint });
   {
     const tx = new Transaction().add(...createDestinationIxs);
     const res = await transactionHandler.sendAndConfirmTransaction(tx, createDestinationSigners);

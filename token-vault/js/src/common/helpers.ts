@@ -26,18 +26,18 @@ import { VAULT_PREFIX, VAULT_PROGRAM_PUBLIC_KEY } from './consts';
 // Transfers
 // -----------------
 export function approveTokenTransfer({
-  tokenAccount,
+  sourceAccount,
   owner,
   amount,
 }: {
-  tokenAccount: PublicKey;
+  sourceAccount: PublicKey;
   owner: PublicKey;
   amount: bignum;
 }): [TransactionInstruction, Keypair] {
   const transferAuthority = Keypair.generate();
   const createApproveIx = Token.createApproveInstruction(
     TOKEN_PROGRAM_ID,
-    tokenAccount,
+    sourceAccount,
     transferAuthority.publicKey,
     owner,
     [],
