@@ -166,7 +166,7 @@
           "desc": "Fraction treasury"
         },
         {
-          "name": "fractionalMintAuthority",
+          "name": "fractionMintAuthority",
           "isMut": false,
           "isSigner": false,
           "desc": "Fraction mint authority for the program - seed of [PREFIX, program_id]"
