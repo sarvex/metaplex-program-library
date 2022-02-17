@@ -20,12 +20,12 @@ const RedeemSharesStruct = new beet.BeetArgsStruct<{
 /**
  * Accounts required by the _RedeemShares_ instruction
  *
- * @property [writable] outstandingShares Initialized Token account containing your fractional shares
- * @property [writable] destination Initialized Destination token account where you wish your proceeds to arrive
- * @property [writable] fractionMint Fraction mint
- * @property [writable] redeemTreasury Redeem treasury account
+ * @property [_writable_] outstandingShares Initialized Token account containing your fractional shares
+ * @property [_writable_] destination Initialized Destination token account where you wish your proceeds to arrive
+ * @property [_writable_] fractionMint Fraction mint
+ * @property [_writable_] redeemTreasury Redeem treasury account
  * @property [] transferAuthority PDA-based Transfer authority for the transfer of proceeds from redeem treasury to destination seed [PREFIX, program_id]
- * @property [signer] burnAuthority Burn authority for the burning of your shares
+ * @property [**signer**] burnAuthority Burn authority for the burning of your shares
  * @property [] vault Combined token vault
  * @category Instructions
  * @category RedeemShares

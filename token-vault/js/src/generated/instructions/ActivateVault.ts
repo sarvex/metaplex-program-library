@@ -37,11 +37,11 @@ const ActivateVaultStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _ActivateVault_ instruction
  *
- * @property [writable] vault Initialized inactivated fractionalized token vault
- * @property [writable] fractionMint Fraction mint
- * @property [writable] fractionTreasury Fraction treasury
+ * @property [_writable_] vault Initialized inactivated fractionalized token vault
+ * @property [_writable_] fractionMint Fraction mint
+ * @property [_writable_] fractionTreasury Fraction treasury
  * @property [] fractionMintAuthority Fraction mint authority for the program - seed of [PREFIX, program_id]
- * @property [signer] vaultAuthority Authority on the vault
+ * @property [**signer**] vaultAuthority Authority on the vault
  * @category Instructions
  * @category ActivateVault
  * @category generated

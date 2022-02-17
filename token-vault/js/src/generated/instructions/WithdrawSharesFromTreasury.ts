@@ -37,11 +37,11 @@ const WithdrawSharesFromTreasuryStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _WithdrawSharesFromTreasury_ instruction
  *
- * @property [writable] destination Initialized Destination account for the shares being withdrawn
- * @property [writable] fractionTreasury Fraction treasury
+ * @property [_writable_] destination Initialized Destination account for the shares being withdrawn
+ * @property [_writable_] fractionTreasury Fraction treasury
  * @property [] vault The initialized active token vault
  * @property [] transferAuthority PDA-based Transfer authority to move tokens from treasury to your destination[PREFIX, program_id]
- * @property [signer] vaultAuthority Authority of vault
+ * @property [**signer**] vaultAuthority Authority of vault
  * @category Instructions
  * @category WithdrawSharesFromTreasury
  * @category generated

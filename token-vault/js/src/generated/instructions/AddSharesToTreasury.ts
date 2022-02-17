@@ -37,11 +37,11 @@ const AddSharesToTreasuryStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _AddSharesToTreasury_ instruction
  *
- * @property [writable] source Initialized account from which shares will be withdrawn
- * @property [writable] fractionTreasury Fraction treasury
+ * @property [_writable_] source Initialized account from which shares will be withdrawn
+ * @property [_writable_] fractionTreasury Fraction treasury
  * @property [] vault The initialized active token vault
- * @property [signer] transferAuthority Transfer authority to move tokens from your account to treasury
- * @property [signer] vaultAuthority Authority of vault
+ * @property [**signer**] transferAuthority Transfer authority to move tokens from your account to treasury
+ * @property [**signer**] vaultAuthority Authority of vault
  * @category Instructions
  * @category AddSharesToTreasury
  * @category generated

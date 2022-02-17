@@ -110,7 +110,7 @@ export class ExternalPriceAccount implements ExternalPriceAccountArgs {
    */
   pretty() {
     return {
-      key: this.key,
+      key: 'Key.' + definedTypes.Key[this.key],
       pricePerShare: this.pricePerShare,
       priceMint: this.priceMint.toBase58(),
       allowedToCombine: this.allowedToCombine,

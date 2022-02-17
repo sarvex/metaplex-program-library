@@ -37,13 +37,13 @@ const AddTokenToInactiveVaultStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _AddTokenToInactiveVault_ instruction
  *
- * @property [writable] safetyDepositAccount Uninitialized safety deposit box account address (will be created and allocated by this endpoint) Address should be pda with seed of [PREFIX, vault_address, token_mint_address]
- * @property [writable] tokenAccount Initialized Token account
- * @property [writable] store Initialized Token store account with authority of this program, this will get set on the safety deposit box
- * @property [writable] vault Initialized inactive fractionalized token vault
- * @property [signer] vaultAuthority Authority on the vault
- * @property [signer] payer Payer
- * @property [signer] transferAuthority Transfer Authority to move desired token amount from token account to safety deposit
+ * @property [_writable_] safetyDepositAccount Uninitialized safety deposit box account address (will be created and allocated by this endpoint) Address should be pda with seed of [PREFIX, vault_address, token_mint_address]
+ * @property [_writable_] tokenAccount Initialized Token account
+ * @property [_writable_] store Initialized Token store account with authority of this program, this will get set on the safety deposit box
+ * @property [_writable_] vault Initialized inactive fractionalized token vault
+ * @property [**signer**] vaultAuthority Authority on the vault
+ * @property [**signer**] payer Payer
+ * @property [**signer**] transferAuthority Transfer Authority to move desired token amount from token account to safety deposit
  * @property [] systemAccount System account sysvar
  * @category Instructions
  * @category AddTokenToInactiveVault

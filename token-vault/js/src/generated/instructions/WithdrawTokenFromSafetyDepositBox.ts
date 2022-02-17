@@ -37,12 +37,12 @@ const WithdrawTokenFromSafetyDepositBoxStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _WithdrawTokenFromSafetyDepositBox_ instruction
  *
- * @property [writable] destination Initialized Destination account for the tokens being withdrawn
- * @property [writable] safetyDeposit The safety deposit box account key for the tokens
- * @property [writable] store The store key on the safety deposit box account
- * @property [writable] vault The initialized combined token vault
+ * @property [_writable_] destination Initialized Destination account for the tokens being withdrawn
+ * @property [_writable_] safetyDeposit The safety deposit box account key for the tokens
+ * @property [_writable_] store The store key on the safety deposit box account
+ * @property [_writable_] vault The initialized combined token vault
  * @property [] fractionMint Fraction mint
- * @property [signer] vaultAuthority Authority of vault
+ * @property [**signer**] vaultAuthority Authority of vault
  * @property [] transferAuthority PDA-based Transfer authority to move the tokens from the store to the destination seed [PREFIX, program_id]
  * @category Instructions
  * @category WithdrawTokenFromSafetyDepositBox

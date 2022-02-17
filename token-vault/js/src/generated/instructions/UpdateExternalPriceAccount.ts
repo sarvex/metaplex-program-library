@@ -36,7 +36,7 @@ const UpdateExternalPriceAccountStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _UpdateExternalPriceAccount_ instruction
  *
- * @property [writable] externalPriceAccount External price account
+ * @property [_writable_] externalPriceAccount External price account
  * @category Instructions
  * @category UpdateExternalPriceAccount
  * @category generated

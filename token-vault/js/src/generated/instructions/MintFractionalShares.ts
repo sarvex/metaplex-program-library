@@ -37,11 +37,11 @@ const MintFractionalSharesStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _MintFractionalShares_ instruction
  *
- * @property [writable] fractionTreasury Fraction treasury
- * @property [writable] fractionMint Fraction mint
+ * @property [_writable_] fractionTreasury Fraction treasury
+ * @property [_writable_] fractionMint Fraction mint
  * @property [] vault The initialized active token vault
  * @property [] mintAuthority PDA-based Mint authority to mint tokens to treasury[PREFIX, program_id]
- * @property [signer] vaultAuthority Authority of vault
+ * @property [**signer**] vaultAuthority Authority of vault
  * @category Instructions
  * @category MintFractionalShares
  * @category generated

@@ -37,10 +37,10 @@ const InitVaultStruct = new beet.BeetArgsStruct<
 /**
  * Accounts required by the _InitVault_ instruction
  *
- * @property [writable] fractionMint Initialized fractional share mint with 0 tokens in supply, authority on mint must be pda of program with seed [prefix, programid]
- * @property [writable] redeemTreasury Initialized redeem treasury token account with 0 tokens in supply, owner of account must be pda of program like above
- * @property [writable] fractionTreasury Initialized fraction treasury token account with 0 tokens in supply, owner of account must be pda of program like above
- * @property [writable] vault Uninitialized vault account
+ * @property [_writable_] fractionMint Initialized fractional share mint with 0 tokens in supply, authority on mint must be pda of program with seed [prefix, programid]
+ * @property [_writable_] redeemTreasury Initialized redeem treasury token account with 0 tokens in supply, owner of account must be pda of program like above
+ * @property [_writable_] fractionTreasury Initialized fraction treasury token account with 0 tokens in supply, owner of account must be pda of program like above
+ * @property [_writable_] vault Uninitialized vault account
  * @property [] authority Authority on the vault
  * @property [] pricingLookupAddress Pricing Lookup Address
  * @category Instructions

@@ -128,7 +128,7 @@ export class Vault implements VaultArgs {
    */
   pretty() {
     return {
-      key: this.key,
+      key: 'Key.' + definedTypes.Key[this.key],
       tokenProgram: this.tokenProgram.toBase58(),
       fractionMint: this.fractionMint.toBase58(),
       authority: this.authority.toBase58(),
@@ -137,7 +137,7 @@ export class Vault implements VaultArgs {
       allowFurtherShareCreation: this.allowFurtherShareCreation,
       pricingLookupAddress: this.pricingLookupAddress.toBase58(),
       tokenTypeCount: this.tokenTypeCount,
-      state: this.state,
+      state: 'VaultState.' + definedTypes.VaultState[this.state],
       lockedPricePerShare: this.lockedPricePerShare,
     };
   }

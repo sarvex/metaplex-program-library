@@ -20,15 +20,15 @@ const CombineVaultStruct = new beet.BeetArgsStruct<{
 /**
  * Accounts required by the _CombineVault_ instruction
  *
- * @property [writable] vault Initialized activated token vault
- * @property [writable] yourOutstandingShares Token account containing your portion of the outstanding fraction shares
- * @property [writable] yourPayment Token account of the redeem_treasury mint type that you will pay with
- * @property [writable] fractionMint Fraction mint
- * @property [writable] fractionTreasury Fraction treasury account
- * @property [writable] redeemTreasury Redeem treasury account
+ * @property [_writable_] vault Initialized activated token vault
+ * @property [_writable_] yourOutstandingShares Token account containing your portion of the outstanding fraction shares
+ * @property [_writable_] yourPayment Token account of the redeem_treasury mint type that you will pay with
+ * @property [_writable_] fractionMint Fraction mint
+ * @property [_writable_] fractionTreasury Fraction treasury account
+ * @property [_writable_] redeemTreasury Redeem treasury account
  * @property [] newVaultAuthority New authority on the vault going forward - can be same authority if you want
- * @property [signer] vaultAuthority Authority on the vault
- * @property [signer] transferAuthority Transfer authority for the token account and outstanding fractional shares account you're transferring from
+ * @property [**signer**] vaultAuthority Authority on the vault
+ * @property [**signer**] transferAuthority Transfer authority for the token account and outstanding fractional shares account you're transferring from
  * @property [] fractionBurnAuthority PDA-based Burn authority for the fraction treasury account containing the uncirculated shares seed [PREFIX, program_id]
  * @property [] externalPricing External pricing lookup address
  * @category Instructions

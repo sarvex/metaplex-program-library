@@ -19,8 +19,8 @@ const SetAuthorityStruct = new beet.BeetArgsStruct<{
 /**
  * Accounts required by the _SetAuthority_ instruction
  *
- * @property [writable] vault Vault
- * @property [signer] currentAuthority Vault authority
+ * @property [_writable_] vault Vault
+ * @property [**signer**] currentAuthority Vault authority
  * @property [] newAuthority New authority
  * @category Instructions
  * @category SetAuthority

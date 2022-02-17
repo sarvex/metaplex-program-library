@@ -107,7 +107,7 @@ export class SafetyDepositBox implements SafetyDepositBoxArgs {
    */
   pretty() {
     return {
-      key: this.key,
+      key: 'Key.' + definedTypes.Key[this.key],
       vault: this.vault.toBase58(),
       tokenMint: this.tokenMint.toBase58(),
       store: this.store.toBase58(),
