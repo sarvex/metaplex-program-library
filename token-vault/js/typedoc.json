@@ -3,6 +3,17 @@
   "excludeInternal": true,
   "excludePrivate": true,
   "categorizeByGroup": false,
+  "defaultCategory": "sdk",
+  "categoryOrder": [
+    "*",
+    "Accounts",
+    "Instructions",
+    "constants",
+    "enums",
+    "userTypes",
+    "sdk",
+    "generated"
+  ],
   "readme": "none",
   "emit": "both",
   "out": "./docs"
