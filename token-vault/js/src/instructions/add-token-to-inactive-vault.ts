@@ -7,7 +7,7 @@ import {
   SystemProgram,
   TransactionInstruction,
 } from '@solana/web3.js';
-import { VAULT_PREFIX, VAULT_PROGRAM_PUBLIC_KEY } from '../common/consts';
+import { VAULT_PREFIX, VAULT_PROGRAM_ID } from '../common/consts';
 import {
   mintTokens,
   createMint,
@@ -170,11 +170,8 @@ export class SafetyDepositSetup {
     // -----------------
     // Store Account
     // -----------------
-    const [
-      createStoreIxs,
-      createStoreSigners,
-      { tokenAccount: storeAccount },
-    ] = await createVaultOwnedTokenAccount(connection, payer, vault, tokenMint);
+    const [createStoreIxs, createStoreSigners, { tokenAccount: storeAccount }] =
+      await createVaultOwnedTokenAccount(connection, payer, vault, tokenMint);
     instructions.push(...createStoreIxs);
     signers.push(...createStoreSigners);
 
@@ -287,14 +284,8 @@ export async function addTokenToInactiveVault(
   safetyDepositSetup: SafetyDepositSetup,
   ixAccounts: { payer: PublicKey; vaultAuthority: PublicKey },
 ) {
-  const {
-    vault,
-    safetyDeposit,
-    transferAuthority,
-    store,
-    tokenAccount,
-    mintAmount,
-  } = safetyDepositSetup;
+  const { vault, safetyDeposit, transferAuthority, store, tokenAccount, mintAmount } =
+    safetyDepositSetup;
   const accounts: Omit<AddTokenToInactiveVaultInstructionAccounts, 'systemAccount'> = {
     safetyDepositAccount: safetyDeposit,
     tokenAccount,
@@ -342,7 +333,7 @@ export async function addTokenToInactiveVaultDirect(
 async function getSafetyDepositAccount(vault: PublicKey, tokenMint: PublicKey): Promise<PublicKey> {
   const [pda] = await PublicKey.findProgramAddress(
     [Buffer.from(VAULT_PREFIX), vault.toBuffer(), tokenMint.toBuffer()],
-    VAULT_PROGRAM_PUBLIC_KEY,
+    VAULT_PROGRAM_ID,
   );
   return pda;
 }

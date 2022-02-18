@@ -2,7 +2,7 @@ import test from 'tape';
 import { AddressLabels } from '@metaplex-foundation/amman';
 
 import debug from 'debug';
-import { VAULT_PROGRAM_ID } from '../../src/mpl-token-vault';
+import { VAULT_PROGRAM_ADDRESS } from '../../src/mpl-token-vault';
 
 export * from './accounts';
 export * from './asserts';
@@ -17,7 +17,7 @@ export const logTrace = debug('vault:test:trace');
 
 const persistLabelsPath = process.env.ADDRESS_LABEL_PATH;
 const knownLabels = {
-  [VAULT_PROGRAM_ID]: 'TokenVault',
+  [VAULT_PROGRAM_ADDRESS]: 'TokenVault',
 };
 
 export const addressLabels = new AddressLabels(knownLabels, logDebug, persistLabelsPath);

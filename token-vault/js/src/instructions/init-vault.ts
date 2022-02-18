@@ -12,7 +12,7 @@ import {
   SystemProgram,
   TransactionInstruction,
 } from '@solana/web3.js';
-import { VAULT_PROGRAM_PUBLIC_KEY } from '../common/consts';
+import { VAULT_PROGRAM_ID } from '../common/consts';
 import { createMint, createTokenAccount, pdaForVault } from '../common/helpers';
 import {
   createInitVaultInstruction,
@@ -211,7 +211,7 @@ export class VaultSetup {
       newAccountPubkey: this.vaultPair.publicKey,
       lamports: vaultRentExempt,
       space: Vault.byteSize,
-      programId: VAULT_PROGRAM_PUBLIC_KEY,
+      programId: VAULT_PROGRAM_ID,
     });
     this.instructions.push(uninitializedVaultIx);
     this.signers.push(this.vaultPair);

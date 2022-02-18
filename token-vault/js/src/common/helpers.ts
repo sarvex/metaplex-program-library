@@ -15,7 +15,7 @@ import {
   TransactionInstruction,
 } from '@solana/web3.js';
 import { InstructionsWithAccounts } from '../types';
-import { VAULT_PREFIX, VAULT_PROGRAM_PUBLIC_KEY } from './consts';
+import { VAULT_PREFIX, VAULT_PROGRAM_ID } from './consts';
 
 // -----------------
 // Helpers from common/src/actions/action.ts adapted to return instructions + signers instead of mutating
@@ -154,11 +154,8 @@ export function createTokenAccount(
   mint: PublicKey,
   owner: PublicKey,
 ): InstructionsWithAccounts<{ tokenAccountPair: Keypair; tokenAccount: PublicKey }> {
-  const [
-    createAccountIx,
-    signer,
-    { tokenAccountPair, tokenAccount },
-  ] = createUninitializedTokenAccount(payer, accountRentExempt);
+  const [createAccountIx, signer, { tokenAccountPair, tokenAccount }] =
+    createUninitializedTokenAccount(payer, accountRentExempt);
   const initAccountIx = Token.createInitAccountInstruction(
     TOKEN_PROGRAM_ID,
     mint,
@@ -217,8 +214,8 @@ export async function createVaultOwnedTokenAccount(
  */
 export async function pdaForVault(vault: PublicKey) {
   const [vaultPDA] = await PublicKey.findProgramAddress(
-    [Buffer.from(VAULT_PREFIX), VAULT_PROGRAM_PUBLIC_KEY.toBuffer(), vault.toBuffer()],
-    VAULT_PROGRAM_PUBLIC_KEY,
+    [Buffer.from(VAULT_PREFIX), VAULT_PROGRAM_ID.toBuffer(), vault.toBuffer()],
+    VAULT_PROGRAM_ID,
   );
   return vaultPDA;
 }

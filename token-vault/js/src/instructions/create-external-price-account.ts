@@ -6,7 +6,7 @@ import {
   UpdateExternalPriceAccountInstructionAccounts,
   UpdateExternalPriceAccountInstructionArgs,
 } from '../generated';
-import { QUOTE_MINT, VAULT_PROGRAM_ID } from '../mpl-token-vault';
+import { QUOTE_MINT, VAULT_PROGRAM_ADDRESS } from '../mpl-token-vault';
 import { InstructionsWithAccounts } from '../types';
 
 /**
@@ -35,7 +35,7 @@ export async function createExternalPriceAccount(
     newAccountPubkey: externalPriceAccountPair.publicKey,
     lamports: rentExempt,
     space: ExternalPriceAccount.byteSize, // 1 + 8 + 32 + 1
-    programId: new PublicKey(VAULT_PROGRAM_ID),
+    programId: new PublicKey(VAULT_PROGRAM_ADDRESS),
   });
 
   // -----------------
