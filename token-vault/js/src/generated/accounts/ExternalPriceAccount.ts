@@ -60,6 +60,23 @@ export class ExternalPriceAccount implements ExternalPriceAccountArgs {
   }
 
   /**
+   * Retrieves the account info from the provided address and deserializes
+   * the {@link ExternalPriceAccount} from its data.
+   *
+   * @throws Error if no account info is found at the address or if deserialization fails
+   */
+  static async fromAccountAddress(
+    connection: web3.Connection,
+    address: web3.PublicKey,
+  ): Promise<ExternalPriceAccount> {
+    const accountInfo = await connection.getAccountInfo(address);
+    if (accountInfo == null) {
+      throw new Error(`Unable to find ExternalPriceAccount account at ${address}`);
+    }
+    return ExternalPriceAccount.fromAccountInfo(accountInfo, 0)[0];
+  }
+
+  /**
    * Deserializes the {@link ExternalPriceAccount} from the provided data Buffer.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
