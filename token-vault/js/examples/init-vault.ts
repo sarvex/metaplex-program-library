@@ -87,7 +87,7 @@ export async function initVault(
   // -----------------
   // 2. Using the accounts we setup above we can now initialize our vault
   // -----------------
-  const initVaultIx = await createInitVaultIx(vaultSetup, allowFurtherShareCreation);
+  const initVaultIx = createInitVaultIx(vaultSetup, allowFurtherShareCreation);
   const initVaulTx = new Transaction().add(initVaultIx);
   await sendAndConfirmTransaction(connection, initVaulTx, [payer]);
 

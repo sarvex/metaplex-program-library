@@ -1,4 +1,9 @@
-import { AccountLayout as TokenAccountLayout, MintLayout } from '@solana/spl-token';
+import {
+  AccountLayout as TokenAccountLayout,
+  MintLayout,
+  Token,
+  TOKEN_PROGRAM_ID,
+} from '@solana/spl-token';
 import {
   Connection,
   Keypair,
@@ -100,8 +105,23 @@ export class VaultSetup {
   // -----------------
   // Fraction Mint
   // -----------------
-  // TODO(thlorenz): setAuthority (mint) to vault
-  async supplyFractionMint() {}
+  async supplyFractionMint(fractionMint: PublicKey, currentMintAuthority: Keypair) {
+    const transferAuthIx = Token.createSetAuthorityInstruction(
+      TOKEN_PROGRAM_ID,
+      fractionMint, // account
+      this.vaultPda, // new authority
+      'MintTokens', // authority type
+      currentMintAuthority.publicKey, // current authority
+      [],
+    );
+    this.instructions.push(transferAuthIx);
+    this.signers.push(currentMintAuthority);
+
+    this.fractionMint = fractionMint;
+    this.fractionMintAuthority = this.vaultPda;
+
+    return this;
+  }
 
   /**
    * 1. Fraction Mint
@@ -296,7 +316,7 @@ export class VaultSetup {
  *
  * @param vaultSetup set it up via {@link VaultSetup} methods
  */
-export async function initVault(vaultSetup: VaultSetup, allowFurtherShareCreation: boolean) {
+export function initVault(vaultSetup: VaultSetup, allowFurtherShareCreation: boolean) {
   const accounts = vaultSetup.getAccounts();
 
   const initVaultArgs: InitVaultInstructionArgs = {

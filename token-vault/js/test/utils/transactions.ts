@@ -92,7 +92,7 @@ export async function initVault(t: Test, args: { allowFurtherShareCreation?: boo
     await init();
   const vaultSetup = await initVaultSetup(t, connection, transactionHandler, payer, vaultAuthority);
   const { allowFurtherShareCreation = false } = args;
-  const initVaultIx = await createInitVaultIx(vaultSetup, allowFurtherShareCreation);
+  const initVaultIx = createInitVaultIx(vaultSetup, allowFurtherShareCreation);
 
   const initVaultTx = new Transaction().add(initVaultIx);
   await transactionHandler.sendAndConfirmTransaction(initVaultTx, []);

@@ -15,7 +15,7 @@ test('init-vault: init vault allowing further share creation', async (t) => {
   const { transactionHandler, connection, payer, vaultAuthority } = await init();
   const vaultSetup = await initVaultSetup(t, connection, transactionHandler, payer, vaultAuthority);
 
-  const initVaultIx = await initVault(vaultSetup, true);
+  const initVaultIx = initVault(vaultSetup, true);
 
   const initVaulTx = new Transaction().add(initVaultIx);
   const initVaultRes = await transactionHandler.sendAndConfirmTransaction(initVaulTx, []);
@@ -35,7 +35,7 @@ test('init-vault: init vault not allowing further share creation', async (t) => 
   const { transactionHandler, connection, payer, vaultAuthority } = await init();
   const vaultSetup = await initVaultSetup(t, connection, transactionHandler, payer, vaultAuthority);
 
-  const initVaultIx = await initVault(vaultSetup, false);
+  const initVaultIx = initVault(vaultSetup, false);
 
   const initVaulTx = new Transaction().add(initVaultIx);
   const initVaultRes = await transactionHandler.sendAndConfirmTransaction(initVaulTx, []);
@@ -56,12 +56,12 @@ test('init-vault: init vault twice for same account', async (t) => {
   const vaultSetup = await initVaultSetup(t, connection, transactionHandler, payer, vaultAuthority);
 
   {
-    const initVaultIx = await initVault(vaultSetup, true);
+    const initVaultIx = initVault(vaultSetup, true);
     const initVaulTx = new Transaction().add(initVaultIx);
     await transactionHandler.sendAndConfirmTransaction(initVaulTx, []);
   }
   {
-    const initVaultIx = await initVault(vaultSetup, true);
+    const initVaultIx = initVault(vaultSetup, true);
     const initVaulTx = new Transaction().add(initVaultIx);
     try {
       await transactionHandler.sendAndConfirmTransaction(initVaulTx, []);
