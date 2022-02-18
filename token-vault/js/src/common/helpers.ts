@@ -154,8 +154,11 @@ export function createTokenAccount(
   mint: PublicKey,
   owner: PublicKey,
 ): InstructionsWithAccounts<{ tokenAccountPair: Keypair; tokenAccount: PublicKey }> {
-  const [createAccountIx, signer, { tokenAccountPair, tokenAccount }] =
-    createUninitializedTokenAccount(payer, accountRentExempt);
+  const [
+    createAccountIx,
+    signer,
+    { tokenAccountPair, tokenAccount },
+  ] = createUninitializedTokenAccount(payer, accountRentExempt);
   const initAccountIx = Token.createInitAccountInstruction(
     TOKEN_PROGRAM_ID,
     mint,

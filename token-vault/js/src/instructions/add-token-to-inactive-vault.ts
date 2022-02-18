@@ -37,7 +37,8 @@ import {
  * The {@link SafetyDepositSetup} is then provided to {@link addTokenToInactiveVault}
  * in order to create the instruction to add the tokens to the vault.
  *
- * @category AddTokenToInactiveVault:Instructions
+ * @category AddTokenToInactiveVault
+ * @cateogry Instructions
  */
 export class SafetyDepositSetup {
   private constructor(
@@ -169,8 +170,11 @@ export class SafetyDepositSetup {
     // -----------------
     // Store Account
     // -----------------
-    const [createStoreIxs, createStoreSigners, { tokenAccount: storeAccount }] =
-      await createVaultOwnedTokenAccount(connection, payer, vault, tokenMint);
+    const [
+      createStoreIxs,
+      createStoreSigners,
+      { tokenAccount: storeAccount },
+    ] = await createVaultOwnedTokenAccount(connection, payer, vault, tokenMint);
     instructions.push(...createStoreIxs);
     signers.push(...createStoreSigners);
 
@@ -271,7 +275,8 @@ export class SafetyDepositSetup {
  *
  * - debit {@link SafetyDepositSetup.mintAmount} (transferred to store)
  *
- * @category AddTokenToInactiveVault:Instructions
+ * @category AddTokenToInactiveVault
+ * @cateogry Instructions
  *
  * @param safetyDepositSetup created via {@link SafetyDepositSetup.create}
  * @param ixAccounts
@@ -282,8 +287,14 @@ export async function addTokenToInactiveVault(
   safetyDepositSetup: SafetyDepositSetup,
   ixAccounts: { payer: PublicKey; vaultAuthority: PublicKey },
 ) {
-  const { vault, safetyDeposit, transferAuthority, store, tokenAccount, mintAmount } =
-    safetyDepositSetup;
+  const {
+    vault,
+    safetyDeposit,
+    transferAuthority,
+    store,
+    tokenAccount,
+    mintAmount,
+  } = safetyDepositSetup;
   const accounts: Omit<AddTokenToInactiveVaultInstructionAccounts, 'systemAccount'> = {
     safetyDepositAccount: safetyDeposit,
     tokenAccount,
@@ -310,7 +321,8 @@ export async function addTokenToInactiveVault(
  * Please {@see addTokenToInactiveVault} for a more intuitive way to set up
  * this instruction and required accounts.
  *
- * @category AddTokenToInactiveVault:Instructions
+ * @category AddTokenToInactiveVault
+ * @cateogry Instructions
  */
 export async function addTokenToInactiveVaultDirect(
   amountArgs: AmountArgs,

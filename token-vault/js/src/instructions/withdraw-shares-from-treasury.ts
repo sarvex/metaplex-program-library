@@ -21,8 +21,11 @@ export async function setupWithdrawDestinationAccount(
 ): Promise<InstructionsWithAccounts<{ destination: PublicKey; destinationPair: Keypair }>> {
   const rentExempt = await getTokenRentExempt(connection);
   const { payer, fractionMint } = args;
-  const [instructions, signers, { tokenAccount: destination, tokenAccountPair: destinationPair }] =
-    createTokenAccount(payer, rentExempt, fractionMint, payer);
+  const [
+    instructions,
+    signers,
+    { tokenAccount: destination, tokenAccountPair: destinationPair },
+  ] = createTokenAccount(payer, rentExempt, fractionMint, payer);
   return [instructions, signers, { destination, destinationPair }];
 }
 

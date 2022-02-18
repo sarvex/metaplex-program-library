@@ -71,7 +71,8 @@ export type CombineVaultAccounts = Omit<CombineVaultInstructionAccounts, 'fracti
  * - authority: newAuthority address
  * - lockedPricePerShare: externalPricing.pricePerShare
  *
- * @category CombineVault:Instructions
+ * @category CombineVault
+ * @cateogry Instructions
  */
 export async function combineVault(accounts: CombineVaultAccounts) {
   const fractionBurnAuthority = await pdaForVault(accounts.vault);

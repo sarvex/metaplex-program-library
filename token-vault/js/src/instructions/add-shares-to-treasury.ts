@@ -29,8 +29,11 @@ export async function createAddSharesSourceAccount(
 > {
   const { payer, fractionMint, fractionMintAuthority, amount } = args;
   const rentExempt = await getTokenRentExempt(connection);
-  const [createIxs, createSigners, { tokenAccount: source, tokenAccountPair: sourcePair }] =
-    createTokenAccount(payer, rentExempt, fractionMint, payer);
+  const [
+    createIxs,
+    createSigners,
+    { tokenAccount: source, tokenAccountPair: sourcePair },
+  ] = createTokenAccount(payer, rentExempt, fractionMint, payer);
 
   const mintIx = mintTokens(fractionMint, source, fractionMintAuthority, amount);
 

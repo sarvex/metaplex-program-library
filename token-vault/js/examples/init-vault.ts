@@ -21,8 +21,9 @@ import {
   QUOTE_MINT,
   createExternalPriceAccount,
   // The InitVault class holds all related methods, including methods to setup accounts
-  InitVault,
+  initVault as createInitVaultIx,
   Vault,
+  VaultSetup,
 } from '../src/mpl-token-vault';
 
 // Using wrapped SOL mint here, you may choose to use another
@@ -62,36 +63,38 @@ export async function initVault(
   const [createExternalAccountIxs, createExternalAccountSigners, { externalPriceAccount }] =
     await createExternalPriceAccount(connection, payer.publicKey);
 
-  const [setupAccountsIxs, setupAccountsSigners, initVaultAccounts] =
-    await InitVault.setupInitVaultAccounts(connection, {
-      payer: payer.publicKey,
-      vaultAuthority: vaultAuthority.publicKey,
-      priceMint,
-      externalPriceAccount,
-    });
+  const vaultSetup: VaultSetup = await VaultSetup.create(connection, {
+    vaultAuthority: vaultAuthority.publicKey,
+    priceMint,
+    externalPriceAccount,
+  });
+
+  await vaultSetup.createFracionMint(payer.publicKey);
+  await vaultSetup.createFractionTreasury(payer.publicKey);
+  await vaultSetup.createRedeemnTreasury(payer.publicKey);
+  await vaultSetup.createVault(payer.publicKey);
 
   const createAndSetupAccountsTx = new Transaction()
     .add(...createExternalAccountIxs)
-    .add(...setupAccountsIxs);
+    .add(...vaultSetup.instructions);
 
   await sendAndConfirmTransaction(connection, createAndSetupAccountsTx, [
     payer,
     ...createExternalAccountSigners,
-    ...setupAccountsSigners,
+    ...vaultSetup.signers,
   ]);
 
   // -----------------
   // 2. Using the accounts we setup above we can now initialize our vault
   // -----------------
-  const initVaultIx = await InitVault.initVault(initVaultAccounts, {
-    allowFurtherShareCreation,
-  });
+  const initVaultIx = await createInitVaultIx(vaultSetup, allowFurtherShareCreation);
   const initVaulTx = new Transaction().add(initVaultIx);
   await sendAndConfirmTransaction(connection, initVaulTx, [payer]);
 
   // -----------------
   // 3. We can now query the initialized vault
   // -----------------
+  const initVaultAccounts = vaultSetup.getAccounts();
   const vaultAccountInfo = await connection.getAccountInfo(initVaultAccounts.vault);
   assert(vaultAccountInfo != null);
   const [vaultAccount] = Vault.fromAccountInfo(vaultAccountInfo);

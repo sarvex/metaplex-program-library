@@ -6,17 +6,17 @@ import {
   LOCALHOST,
   PayerTransactionHandler,
 } from '@metaplex-foundation/amman';
-import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
+import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { addressLabels } from '.';
 import {
   activateVault,
   ActivateVaultAccounts,
   createExternalPriceAccount,
-  InitVault,
-  InitVaultInstructionAccounts,
   QUOTE_MINT,
+  VaultSetup,
+  initVault as createInitVaultIx,
+  CompletedVaultSetup,
 } from '../../src/mpl-token-vault';
-import { pdaForVault } from '../../src/common/helpers';
 
 export async function init() {
   const [payer, payerPair] = addressLabels.genKeypair('payer');
@@ -36,13 +36,13 @@ export async function init() {
   };
 }
 
-export async function setupInitVaultAccounts(
+export async function initVaultSetup(
   t: Test,
   connection: Connection,
   transactionHandler: PayerTransactionHandler,
   payer: PublicKey,
   vaultAuthority: PublicKey,
-): Promise<InitVaultInstructionAccounts & { vaultPair: Keypair }> {
+): Promise<CompletedVaultSetup> {
   // -----------------
   // Create External Account
   // -----------------
@@ -56,23 +56,26 @@ export async function setupInitVaultAccounts(
   // -----------------
   // Setup Init Vault Accounts
   // -----------------
-  const [setupAccountsIxs, setupAccountsSigners, initVaultAccounts] =
-    await InitVault.setupInitVaultAccounts(connection, {
-      payer,
-      vaultAuthority,
-      priceMint,
-      externalPriceAccount,
-    });
+  const vaultSetup: VaultSetup = await VaultSetup.create(connection, {
+    vaultAuthority,
+    priceMint,
+    externalPriceAccount,
+  });
 
-  addressLabels.addLabels(initVaultAccounts);
+  await vaultSetup.createFracionMint(payer);
+  await vaultSetup.createFractionTreasury(payer);
+  await vaultSetup.createRedeemnTreasury(payer);
+  await vaultSetup.createVault(payer);
+
+  addressLabels.addLabels(vaultSetup.getAccounts());
 
   const createAndSetupAccountsTx = new Transaction()
     .add(...createExternalAccountIxs)
-    .add(...setupAccountsIxs);
+    .add(...vaultSetup.instructions);
 
   const createAndSetupAccountsRes = await transactionHandler.sendAndConfirmTransaction(
     createAndSetupAccountsTx,
-    [...createExternalAccountSigners, ...setupAccountsSigners],
+    [...createExternalAccountSigners, ...vaultSetup.signers],
   );
 
   assertConfirmedTransaction(t, createAndSetupAccountsRes.txConfirmed);
@@ -80,29 +83,19 @@ export async function setupInitVaultAccounts(
     msgRx: [/Update External Price Account/i, /InitializeMint/i, /InitializeAccount/i, /success/],
   });
 
-  return initVaultAccounts;
+  vaultSetup.assertComplete();
+  return vaultSetup;
 }
 
 export async function initVault(t: Test, args: { allowFurtherShareCreation?: boolean } = {}) {
   const { transactionHandler, connection, payer, payerPair, vaultAuthority, vaultAuthorityPair } =
     await init();
-  const initVaultAccounts = await setupInitVaultAccounts(
-    t,
-    connection,
-    transactionHandler,
-    payer,
-    vaultAuthority,
-  );
+  const vaultSetup = await initVaultSetup(t, connection, transactionHandler, payer, vaultAuthority);
   const { allowFurtherShareCreation = false } = args;
-  const initVaultIx = await InitVault.initVault(initVaultAccounts, {
-    allowFurtherShareCreation,
-  });
+  const initVaultIx = await createInitVaultIx(vaultSetup, allowFurtherShareCreation);
 
   const initVaultTx = new Transaction().add(initVaultIx);
   await transactionHandler.sendAndConfirmTransaction(initVaultTx, []);
-
-  const fractionMintAuthority = await pdaForVault(initVaultAccounts.vault);
-  addressLabels.addLabels({ fractionMintAuthority });
 
   return {
     connection,
@@ -111,8 +104,8 @@ export async function initVault(t: Test, args: { allowFurtherShareCreation?: boo
       payer,
       payerPair,
       vaultAuthorityPair,
-      fractionMintAuthority,
-      ...initVaultAccounts,
+      fractionMintAuthority: vaultSetup.fractionMintAuthority,
+      ...vaultSetup.getAccounts(),
     },
   };
 }
@@ -131,7 +124,7 @@ export async function initAndActivateVault(
     fractionTreasury,
   } = initVaultAccounts;
 
-  addressLabels.addLabels(initVaultAccounts);
+  addressLabels.findAndAddLabels(initVaultAccounts);
 
   const accounts: ActivateVaultAccounts = {
     vault,

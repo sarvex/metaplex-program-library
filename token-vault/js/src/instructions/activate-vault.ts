@@ -16,7 +16,8 @@ import type { Optional } from 'utility-types';
  *           seed of [PREFIX, program_id] (optional)
  * @property [signer] vaultAuthority Authority on the vault
  *
- * @category ActivateVault:Accounts
+ * @category ActivateVault
+ * @category Accounts
  */
 export type ActivateVaultAccounts = Optional<
   ActivateVaultInstructionAccounts,
@@ -56,7 +57,8 @@ export type ActivateVaultAccounts = Optional<
  *
  * - mints {@link numberOfShares} to fractionTreasury
  *
- * @category ActivateVault:Instructions
+ * @category ActivateVault
+ * @category Instructions
  */
 export async function activateVault(
   vault: PublicKey,

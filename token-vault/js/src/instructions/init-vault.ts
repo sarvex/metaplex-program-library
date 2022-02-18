@@ -1,170 +1,312 @@
 import { AccountLayout as TokenAccountLayout, MintLayout } from '@solana/spl-token';
-import { Connection, Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  Signer,
+  SystemProgram,
+  TransactionInstruction,
+} from '@solana/web3.js';
 import { VAULT_PROGRAM_PUBLIC_KEY } from '../common/consts';
 import { createMint, createTokenAccount, pdaForVault } from '../common/helpers';
 import {
   createInitVaultInstruction,
-  InitVaultArgs,
   InitVaultInstructionAccounts,
+  InitVaultInstructionArgs,
   Vault,
 } from '../generated';
-import { InstructionsWithAccounts } from '../types';
+import { strict as assert } from 'assert';
+
+type HasFractionMint = VaultSetup & {
+  fractionMint: PublicKey;
+  fractionMintAuthority: PublicKey;
+};
+type HasFractionTreasury = VaultSetup & {
+  fractionTreasury: PublicKey;
+};
+type HasRedeemTreasury = VaultSetup & {
+  redeemTreasury: PublicKey;
+};
+/**
+ * A {@link VaultSetup} that has been completed, meaning all necessary accounts
+ * were either provided or have been created and initialized.
+ *
+ * @category InitVault
+ * @category Instructions
+ */
+export type CompletedVaultSetup = VaultSetup &
+  HasFractionMint &
+  HasFractionTreasury &
+  HasRedeemTreasury;
 
 /**
- * Exposes two methods essential to initializing a vault properly.
+ * Sets up the accounts needed to conform to the conditions outlined in
+ * {@link initVault} in order to initialize a vault with them.
+ * Use these method if you don't have those accounts setup already.
  *
- * @category InitVault:Instructions
+ * See {@link InitVaultInstructionAccounts} for more information about those accounts.
+ * @param args
+ * @param args.externalPriceAccount should be created via {@link createExternalPriceAccount}
+ *
+ * @category InitVault
+ * @category Instructions
  */
-export class InitVault {
+export class VaultSetup {
+  readonly instructions: TransactionInstruction[] = [];
+  readonly signers: Signer[] = [];
+
+  fractionMint?: PublicKey;
+  fractionTreasury?: PublicKey;
+  redeemTreasury?: PublicKey;
+  fractionMintAuthority?: PublicKey;
+
+  private constructor(
+    private readonly connection: Connection,
+    readonly vaultPda: PublicKey,
+    readonly vaultPair: Keypair,
+    readonly vaultAuthority: PublicKey,
+    readonly priceMint: PublicKey,
+    readonly externalPriceAccount: PublicKey,
+  ) {}
+
   /**
-   * Sets up the accounts needed to conform to the conditions outlined in
-   * {@link InitVault.initVault} in order to initialize a vault with them.
-   * Use this method if you don't have those accounts setup already.
-   *
-   * See {@link InitVaultInstructionAccounts} for more information about those accounts.
-   * @param args
-   *  - externalPriceAccount should be created via {@link import('./create-external-price-account').createExternalPriceAccount}
-   *
-   * @category InitVault:Instructions
+   * Creates an {@link VaultSetup} which exposes methods to setup the necessary
+   * accounts to initialize a vault.
    */
-  static async setupInitVaultAccounts(
+  static async create(
     connection: Connection,
-    args: {
-      payer: PublicKey;
+    {
+      vaultAuthority,
+      priceMint,
+      externalPriceAccount,
+    }: {
       vaultAuthority: PublicKey;
       priceMint: PublicKey;
       externalPriceAccount: PublicKey;
     },
-  ): Promise<InstructionsWithAccounts<InitVaultInstructionAccounts & { vaultPair: Keypair }>> {
-    // -----------------
-    // Rent Exempts
-    // -----------------
-    const tokenAccountRentExempt = await connection.getMinimumBalanceForRentExemption(
+  ) {
+    const { vaultPair, vaultPda } = await vaultAccountPDA();
+
+    return new VaultSetup(
+      connection,
+      vaultPda,
+      vaultPair,
+      vaultAuthority,
+      priceMint,
+      externalPriceAccount,
+    );
+  }
+
+  // -----------------
+  // Fraction Mint
+  // -----------------
+  // TODO(thlorenz): setAuthority (mint) to vault
+  async supplyFractionMint() {}
+
+  /**
+   * 1. Fraction Mint
+   * Creates a new fraction mint and gives mint authority to the vault.
+   */
+  async createFracionMint(payer: PublicKey) {
+    const mintRentExempt = await this.connection.getMinimumBalanceForRentExemption(MintLayout.span);
+
+    const [fractionMintIxs, fractionMintSigners, { mintAccount }] = createMint(
+      payer,
+      mintRentExempt,
+      0,
+      this.vaultPda, // mintAuthority
+      this.vaultPda, // freezeAuthority
+    );
+    this.instructions.push(...fractionMintIxs);
+    this.signers.push(...fractionMintSigners);
+
+    this.fractionMint = mintAccount;
+    this.fractionMintAuthority = this.vaultPda;
+
+    return this;
+  }
+
+  /**
+   * 2. Fraction Treasury
+   *
+   * Creates a fractionTreasury account owned by the vault which can hold
+   * {@link fractionMint}s.
+   */
+  async createFractionTreasury(payer: PublicKey) {
+    assert(this.hasFractionMint(), 'supply or create fraction mint first');
+    const tokenAccountRentExempt = await this.connection.getMinimumBalanceForRentExemption(
       TokenAccountLayout.span,
     );
 
-    const mintRentExempt = await connection.getMinimumBalanceForRentExemption(MintLayout.span);
-    const vaultRentExempt = await Vault.getMinimumBalanceForRentExemption(connection);
-
-    // -----------------
-    // Account Setups
-    // -----------------
-    const { vaultPair: vault, vaultPDA } = await vaultAccountPDA();
-
-    const [fractionMintIxs, fractionMintSigners, { mintAccount: fractionMint }] = createMint(
-      args.payer,
-      mintRentExempt,
-      0,
-      vaultPDA, // mintAuthority
-      vaultPDA, // freezeAuthority
+    const [fractionTreasuryIxs, fractionTreasurySigners, { tokenAccount }] = createTokenAccount(
+      payer,
+      tokenAccountRentExempt,
+      this.fractionMint, // mint
+      this.vaultPda, // owner
     );
 
-    const [redeemTreasuryIxs, redeemTreasurySigners, { tokenAccount: redeemTreasury }] =
-      createTokenAccount(
-        args.payer,
-        tokenAccountRentExempt,
-        args.priceMint, // mint
-        vaultPDA, // owner
-      );
+    this.instructions.push(...fractionTreasuryIxs);
+    this.signers.push(...fractionTreasurySigners);
 
-    const [fractionTreasuryIxs, fractionTreasurySigners, { tokenAccount: fractionTreasury }] =
-      createTokenAccount(
-        args.payer,
-        tokenAccountRentExempt,
-        fractionMint, // mint
-        vaultPDA, // owner
-      );
+    this.fractionTreasury = tokenAccount;
 
+    return this;
+  }
+
+  /**
+   * 3. Redeem Treasury
+   *
+   * Creates a redeemTreasury account owned by the vault which can hold
+   * {@link priceMint}s.
+   */
+  async createRedeemnTreasury(payer: PublicKey) {
+    const tokenAccountRentExempt = await this.connection.getMinimumBalanceForRentExemption(
+      TokenAccountLayout.span,
+    );
+
+    const [redeemTreasuryIxs, redeemTreasurySigners, { tokenAccount }] = createTokenAccount(
+      payer,
+      tokenAccountRentExempt,
+      this.priceMint, // mint
+      this.vaultPda, // owner
+    );
+
+    this.instructions.push(...redeemTreasuryIxs);
+    this.signers.push(...redeemTreasurySigners);
+
+    this.redeemTreasury = tokenAccount;
+
+    return this;
+  }
+
+  /**
+   * 4. Vault
+   *
+   * Creates the vault account which holds all data of the vault.
+   */
+  async createVault(payer: PublicKey) {
+    const vaultRentExempt = await Vault.getMinimumBalanceForRentExemption(this.connection);
     const uninitializedVaultIx = SystemProgram.createAccount({
-      fromPubkey: args.payer,
-      newAccountPubkey: vault.publicKey,
+      fromPubkey: payer,
+      newAccountPubkey: this.vaultPair.publicKey,
       lamports: vaultRentExempt,
       space: Vault.byteSize,
       programId: VAULT_PROGRAM_PUBLIC_KEY,
     });
+    this.instructions.push(uninitializedVaultIx);
+    this.signers.push(this.vaultPair);
 
-    return [
-      [...fractionMintIxs, ...redeemTreasuryIxs, ...fractionTreasuryIxs, uninitializedVaultIx],
-      [...fractionMintSigners, ...redeemTreasurySigners, ...fractionTreasurySigners, vault],
-      {
-        fractionMint,
-        redeemTreasury,
-        fractionTreasury,
-        vault: vault.publicKey,
-        vaultPair: vault,
-        authority: args.vaultAuthority,
-        pricingLookupAddress: args.externalPriceAccount,
-      },
-    ];
+    return this;
   }
 
+  // -----------------
+  // Prepared Accounts
+  // -----------------
   /**
-   * Initializes the Vault.
-   *
-   * ### Conditions for {@link InitVaultInstructionAccounts} accounts to Init a Vault
-   *
-   * When setting up the vault accounts via
-   * {@link InitVault.setupInitVaultAccounts} those conditions will be met.
-   *
-   * All accounts holding data need to be _initialized_ and _rent exempt_.
-   *
-   * #### Vault
-   *
-   * - owned by: Vault Program
-   * - is uninitialized
-   *
-   * #### pricingLookupAddress
-   *
-   * - provides: {@link ExternalPriceAccount} data
-   *
-   * #### fractionMint
-   *
-   * - owned by: Token Program
-   * - supply: 0
-   * - mintAuthority: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
-   * - freezeAuthority: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
-   *
-   * #### fractionTreasury
-   *
-   * - owned by: Token Program
-   * - amount: 0
-   * - owner: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
-   * - delegate: unset
-   * - closeAuthority: unset
-   * - mint: fractionMint address
-   *
-   * #### redeemTreasury
-   *
-   * - owned by: Token Program
-   * - amount: 0
-   * - owner: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
-   * - delegate: unset
-   * - closeAuthority: unset
-   * - mint: externalPriceAccount.priceMint (via pricingLookupAddress)
-   *
-   * ### Updates as Result of successfull Transaction
-   *
-   * #### vault
-   *
-   * - key: {@link Key.VaultV1}
-   * - accounts: addresses set to the provided accounts
-   * - authority: set to authority account address
-   * - tokenTypeCount: 0
-   * - state: {@link VaultState.Inactive}
-   *
-   * @category InitVault:Instructions
-   *
-   * @param accounts set them up via {@link InitVault.setupInitVaultAccounts}
+   * Gets the accounts that are needed to init the vault and have been prepared
+   * with the {@link VaultSetup} methods.
    */
-  static async initVault(accounts: InitVaultInstructionAccounts, initVaultArgs: InitVaultArgs) {
-    return createInitVaultInstruction(accounts, {
-      initVaultArgs,
-    });
+  getAccounts(): InitVaultInstructionAccounts {
+    this.assertComplete();
+    return {
+      fractionMint: this.fractionMint,
+      fractionTreasury: this.fractionTreasury,
+      redeemTreasury: this.redeemTreasury,
+      vault: this.vaultPair.publicKey,
+      authority: this.vaultAuthority,
+      pricingLookupAddress: this.externalPriceAccount,
+    };
   }
+
+  // -----------------
+  // Guards
+  // -----------------
+  private hasFractionMint(this: VaultSetup): this is HasFractionMint {
+    return this.fractionMint != null && this.fractionMintAuthority != null;
+  }
+  private hasFractionTreasury(this: VaultSetup): this is HasFractionTreasury {
+    return this.fractionTreasury != null;
+  }
+  private hasRedeemTreasury(this: VaultSetup): this is HasRedeemTreasury {
+    return this.redeemTreasury != null;
+  }
+
+  assertComplete(): asserts this is CompletedVaultSetup {
+    assert(this.hasFractionMint(), 'need to supply or create fraction mint');
+    assert(this.hasFractionTreasury(), 'need to create fraction treasury');
+    assert(this.hasRedeemTreasury(), 'need to create redeem treasury');
+  }
+}
+
+/**
+ * Initializes the Vault.
+ *
+ * ### Conditions for {@link InitVaultInstructionAccounts} accounts to Init a Vault
+ *
+ * When setting up the vault accounts via {@link VaultSetup} methods those conditions will be met.
+ *
+ * All accounts holding data need to be _initialized_ and _rent exempt_.
+ *
+ * #### Vault
+ *
+ * - owned by: Vault Program
+ * - is uninitialized
+ *
+ * #### pricingLookupAddress
+ *
+ * - provides: {@link ExternalPriceAccount} data
+ *
+ * #### fractionMint
+ *
+ * - owned by: Token Program
+ * - supply: 0
+ * - mintAuthority: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
+ * - freezeAuthority: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
+ *
+ * #### fractionTreasury
+ *
+ * - owned by: Token Program
+ * - amount: 0
+ * - owner: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
+ * - delegate: unset
+ * - closeAuthority: unset
+ * - mint: fractionMint address
+ *
+ * #### redeemTreasury
+ *
+ * - owned by: Token Program
+ * - amount: 0
+ * - owner: vault PDA (`[PREFIX, PROGRAM_ID, vault_address]`)
+ * - delegate: unset
+ * - closeAuthority: unset
+ * - mint: externalPriceAccount.priceMint (via pricingLookupAddress)
+ *
+ * ### Updates as Result of successfull Transaction
+ *
+ * #### vault
+ *
+ * - key: {@link Key.VaultV1}
+ * - accounts: addresses set to the provided accounts
+ * - authority: set to authority account address
+ * - tokenTypeCount: 0
+ * - state: {@link VaultState.Inactive}
+ *
+ * @category InitVault
+ * @category Instructions
+ *
+ * @param vaultSetup set it up via {@link VaultSetup} methods
+ */
+export async function initVault(vaultSetup: VaultSetup, allowFurtherShareCreation: boolean) {
+  const accounts = vaultSetup.getAccounts();
+
+  const initVaultArgs: InitVaultInstructionArgs = {
+    initVaultArgs: { allowFurtherShareCreation },
+  };
+  return createInitVaultInstruction(accounts, initVaultArgs);
 }
 
 async function vaultAccountPDA() {
   const vaultPair = Keypair.generate();
-  const vaultPDA = await pdaForVault(vaultPair.publicKey);
-  return { vaultPair, vaultPDA };
+  const vaultPda = await pdaForVault(vaultPair.publicKey);
+  return { vaultPair, vaultPda };
 }

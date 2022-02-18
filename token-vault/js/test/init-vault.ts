@@ -1,29 +1,21 @@
 import test from 'tape';
 
-import { assertInactiveVault, init, setupInitVaultAccounts, killStuckProcess } from './utils';
+import { assertInactiveVault, init, initVaultSetup, killStuckProcess } from './utils';
 import {
   assertConfirmedTransaction,
   assertError,
   assertTransactionSummary,
 } from '@metaplex-foundation/amman';
 import { Transaction } from '@solana/web3.js';
-import { InitVault } from '../src/instructions/init-vault';
+import { initVault } from '../src/instructions/init-vault';
 
 killStuckProcess();
 
 test('init-vault: init vault allowing further share creation', async (t) => {
   const { transactionHandler, connection, payer, vaultAuthority } = await init();
-  const initVaultAccounts = await setupInitVaultAccounts(
-    t,
-    connection,
-    transactionHandler,
-    payer,
-    vaultAuthority,
-  );
+  const vaultSetup = await initVaultSetup(t, connection, transactionHandler, payer, vaultAuthority);
 
-  const initVaultIx = await InitVault.initVault(initVaultAccounts, {
-    allowFurtherShareCreation: true,
-  });
+  const initVaultIx = await initVault(vaultSetup, true);
 
   const initVaulTx = new Transaction().add(initVaultIx);
   const initVaultRes = await transactionHandler.sendAndConfirmTransaction(initVaulTx, []);
@@ -33,7 +25,7 @@ test('init-vault: init vault allowing further share creation', async (t) => {
     msgRx: [/Init Vault/, /success/],
   });
 
-  await assertInactiveVault(t, connection, initVaultAccounts, {
+  await assertInactiveVault(t, connection, vaultSetup.getAccounts(), {
     allowFurtherShareCreation: true,
     tokenTypeCount: 0,
   });
@@ -41,17 +33,9 @@ test('init-vault: init vault allowing further share creation', async (t) => {
 
 test('init-vault: init vault not allowing further share creation', async (t) => {
   const { transactionHandler, connection, payer, vaultAuthority } = await init();
-  const initVaultAccounts = await setupInitVaultAccounts(
-    t,
-    connection,
-    transactionHandler,
-    payer,
-    vaultAuthority,
-  );
+  const vaultSetup = await initVaultSetup(t, connection, transactionHandler, payer, vaultAuthority);
 
-  const initVaultIx = await InitVault.initVault(initVaultAccounts, {
-    allowFurtherShareCreation: false,
-  });
+  const initVaultIx = await initVault(vaultSetup, false);
 
   const initVaulTx = new Transaction().add(initVaultIx);
   const initVaultRes = await transactionHandler.sendAndConfirmTransaction(initVaulTx, []);
@@ -61,7 +45,7 @@ test('init-vault: init vault not allowing further share creation', async (t) => 
     msgRx: [/Init Vault/, /success/],
   });
 
-  await assertInactiveVault(t, connection, initVaultAccounts, {
+  await assertInactiveVault(t, connection, vaultSetup.getAccounts(), {
     allowFurtherShareCreation: false,
     tokenTypeCount: 0,
   });
@@ -69,27 +53,15 @@ test('init-vault: init vault not allowing further share creation', async (t) => 
 
 test('init-vault: init vault twice for same account', async (t) => {
   const { transactionHandler, connection, payer, vaultAuthority } = await init();
-  const initVaultAccounts = await setupInitVaultAccounts(
-    t,
-    connection,
-    transactionHandler,
-    payer,
-    vaultAuthority,
-  );
+  const vaultSetup = await initVaultSetup(t, connection, transactionHandler, payer, vaultAuthority);
 
   {
-    const initVaultIx = await InitVault.initVault(initVaultAccounts, {
-      allowFurtherShareCreation: true,
-    });
-
+    const initVaultIx = await initVault(vaultSetup, true);
     const initVaulTx = new Transaction().add(initVaultIx);
     await transactionHandler.sendAndConfirmTransaction(initVaulTx, []);
   }
   {
-    const initVaultIx = await InitVault.initVault(initVaultAccounts, {
-      allowFurtherShareCreation: true,
-    });
-
+    const initVaultIx = await initVault(vaultSetup, true);
     const initVaulTx = new Transaction().add(initVaultIx);
     try {
       await transactionHandler.sendAndConfirmTransaction(initVaulTx, []);
