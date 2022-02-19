@@ -6,6 +6,7 @@ import {
   assertInactiveVault,
   initVault,
   killStuckProcess,
+  spokSameBignum,
 } from './utils';
 import { Transaction } from '@solana/web3.js';
 import {
@@ -65,8 +66,8 @@ test('activate vault: inactive vault with no tokens added activate 0 number of s
   });
   spok(t, tokenBalance, {
     $topic: 'fractionalMintAuthority tokens',
-    amountPre: 0,
-    amountPost: NUMBER_OF_SHARES,
+    amountPre: spokSameBignum(0),
+    amountPost: spokSameBignum(NUMBER_OF_SHARES),
   });
 });
 
@@ -109,8 +110,8 @@ test('activate vault: inactive vault with no tokens added activate 1000 number o
   });
   spok(t, tokenBalance, {
     $topic: 'fractionalMintAuthority tokens',
-    amountPre: 0,
-    amountPost: NUMBER_OF_SHARES,
+    amountPre: spokSameBignum(0),
+    amountPost: spokSameBignum(NUMBER_OF_SHARES),
   });
 });
 
@@ -222,8 +223,8 @@ test('activate vault: inactive vault with tokens added activate 111 number of sh
     });
     spok(t, tokenBalance, {
       $topic: 'fractionalMintAuthority tokens',
-      amountPre: 0,
-      amountPost: NUMBER_OF_SHARES,
+      amountPre: spokSameBignum(0),
+      amountPost: spokSameBignum(NUMBER_OF_SHARES),
     });
   }
 });
