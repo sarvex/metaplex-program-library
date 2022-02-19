@@ -106,6 +106,7 @@ export async function initVault(t: Test, args: { allowFurtherShareCreation?: boo
       vaultAuthorityPair,
       fractionMintAuthority: vaultSetup.fractionMintAuthority,
       ...vaultSetup.getAccounts(),
+      priceMint: vaultSetup.priceMint,
     },
   };
 }
