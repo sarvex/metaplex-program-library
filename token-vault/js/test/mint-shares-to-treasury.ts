@@ -73,8 +73,11 @@ test('mint shares: active vault which allows further share creation, mint variou
     const expectedTotal = new BN(numberOfShares).add(new BN(previouslyMinted));
 
     // Ensure the mint authority minted the tokens to fractionTreasury
-    const tokens = TokenBalances.forTransaction(connection, res.txSignature, addressLabels);
-    await tokens.dump(logDebug);
+    const tokens = await TokenBalances.forTransaction(
+      connection,
+      res.txSignature,
+      addressLabels,
+    ).dump(logDebug);
     await verifyTokenBalance(
       t,
       tokens,

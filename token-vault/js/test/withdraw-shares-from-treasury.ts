@@ -101,8 +101,11 @@ test('withdraw shares: active vault which minted sufficient shares, withdraw var
     const expectedTreasuryPreviousTotal = new BN(MINTED_SHARES).sub(new BN(previousDelta));
     const expectedTreasuryTotal = new BN(MINTED_SHARES).sub(expectedDestinationTotal);
 
-    const tokens = TokenBalances.forTransaction(connection, res.txSignature, addressLabels);
-    await tokens.dump(logDebug);
+    const tokens = await TokenBalances.forTransaction(
+      connection,
+      res.txSignature,
+      addressLabels,
+    ).dump(logDebug);
 
     // -----------------
     // Destination Changes
