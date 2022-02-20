@@ -21,11 +21,22 @@ type HasTransferAuthority = CombineVaultSetup & {
   transferAuthorityPair: Keypair;
 };
 
-export type CombineVaultSetupComplete = CombineVaultSetup &
+export type CompletedCombineVaultSetup = CombineVaultSetup &
   HasOutstandingShares &
   HasPayment &
   HasTransferAuthority;
 
+/**
+ * Sets up accounts need to exucute the {@link combineVault} instruction.
+ *
+ * Use the methods it provides to set them up unless have those accounts setup already.
+ *
+ * @param args
+ * @param args.externalPriceAccount should be created via {@link createExternalPriceAccount}
+ *
+ * @category CombineVault
+ * @cateogry Instructions
+ */
 export class CombineVaultSetup {
   readonly instructions: TransactionInstruction[] = [];
   readonly signers: Signer[] = [];
@@ -53,7 +64,8 @@ export class CombineVaultSetup {
   ) {}
 
   /**
-   * 1. Create Combine Setup to setup necessary accounts
+   * 1 Creates an {@link CombineVaultSetup} which exposes methods to setup the necessary
+   * accounts to combine a vault.
    */
   static async create(
     connection: Connection,
@@ -183,7 +195,7 @@ export class CombineVaultSetup {
     return this.transferAuthority != null && this.transferAuthorityPair != null;
   }
 
-  assertComplete(): asserts this is CombineVaultSetupComplete {
+  assertComplete(): asserts this is CompletedCombineVaultSetup {
     assert(this.hasOutstandingShares(), 'need to provide or create outstandingShares');
     assert(this.hasPayment(), 'need to provide or create payment');
     assert(this.hasTransferAuthority(), 'need to approve transfer or add transferAuthority');
@@ -209,25 +221,6 @@ export class CombineVaultSetup {
     };
   }
 }
-/**
- * Accounts required by the _CombineVault_ instruction
- *
- * @property [_writable_] vault Initialized activated token vault
- * @property [_writable_] yourOutstandingShares Token account containing your portion of the outstanding fraction shares
- * @property [_writable_] yourPayment Token account of the redeem_treasury mint type that you will pay with
- * @property [_writable_] fractionMint Fraction mint
- * @property [_writable_] fractionTreasury Fraction treasury account
- * @property [_writable_] redeemTreasury Redeem treasury account
- * @property [] newVaultAuthority New authority on the vault going forward - can be same authority if you want
- * @property [**signer**] vaultAuthority Authority on the vault
- * @property [**signer**] transferAuthority Transfer authority for the token account and outstanding fractional shares account you're transferring from
- * @property [] fractionBurnAuthority PDA-based Burn authority for the fraction treasury account containing the uncirculated shares seed [PREFIX, program_id]
- * @property [] externalPricing External pricing lookup address
- * @category Instructions
- * @category CombineVault
- * @category generated
- */
-
 /**
  * Combines the vault and as part of that mints {@link numberOfShares} to the
  * {@link CombineVaultInstructionAccounts.fractionTreasury}.
@@ -295,6 +288,8 @@ export class CombineVaultSetup {
  * - state: {@link VaultState.Combined}
  * - authority: newAuthority address
  * - lockedPricePerShare: externalPricing.pricePerShare
+ *
+ * @param combineSetup use {@link CombineVaultSetup} methods to prepare it
  *
  * @category CombineVault
  * @cateogry Instructions
