@@ -7,15 +7,13 @@ import {
   initAndActivateVault,
   initVault,
   killStuckProcess,
+  logDebug,
   spokSameBignum,
   spokSamePubkey,
+  verifyTokenBalance,
 } from './utils';
 import { Signer, Transaction } from '@solana/web3.js';
-import {
-  assertConfirmedTransaction,
-  assertError,
-  tokenBalanceFor,
-} from '@metaplex-foundation/amman';
+import { assertConfirmedTransaction, assertError, TokenBalances } from '@metaplex-foundation/amman';
 import { mintSharesToTreasury } from '../src/instructions/mint-shares-to-treasury';
 import { MintFractionalSharesInstructionAccounts } from '../src/mpl-token-vault';
 import spok, { Specifications } from 'spok';
@@ -103,19 +101,20 @@ test('withdraw shares: active vault which minted sufficient shares, withdraw var
     const expectedTreasuryPreviousTotal = new BN(MINTED_SHARES).sub(new BN(previousDelta));
     const expectedTreasuryTotal = new BN(MINTED_SHARES).sub(expectedDestinationTotal);
 
+    const tokens = TokenBalances.forTransaction(connection, res.txSignature, addressLabels);
+    await tokens.dump(logDebug);
+
     // -----------------
     // Destination Changes
     // -----------------
-    const destinationTokenBalance = await tokenBalanceFor(connection, {
-      sig: res.txSignature,
-      mint: fractionMint,
-      owner: payer,
-    });
-    spok(t, destinationTokenBalance, {
-      $topic: 'tokenBalance destination',
-      amountPre: spokSameBignum(previousDelta),
-      amountPost: spokSameBignum(expectedDestinationTotal),
-    });
+    await verifyTokenBalance(
+      t,
+      tokens,
+      destination,
+      fractionMint,
+      previousDelta,
+      expectedDestinationTotal,
+    );
     const destinationAccount = await getAccount(connection, destination);
     spok(t, destinationAccount, <Specifications<Partial<Account>>>{
       $topic: 'destinationAccount',
@@ -128,17 +127,14 @@ test('withdraw shares: active vault which minted sufficient shares, withdraw var
     // -----------------
     // Fraction Treasury Changes
     // -----------------
-    const treasuryTokenBalance = await tokenBalanceFor(connection, {
-      sig: res.txSignature,
-      mint: fractionMint,
-      owner: fractionMintAuthority,
-    });
-    spok(t, treasuryTokenBalance, {
-      $topic: 'tokenBalance fractionTreasury',
-      amountPre: spokSameBignum(expectedTreasuryPreviousTotal),
-      amountPost: spokSameBignum(expectedTreasuryTotal),
-    });
-
+    await verifyTokenBalance(
+      t,
+      tokens,
+      fractionTreasury,
+      fractionMint,
+      expectedTreasuryPreviousTotal,
+      expectedTreasuryTotal,
+    );
     const fractionTreasuryAccount = await getAccount(connection, fractionTreasury);
     spok(t, fractionTreasuryAccount, <Specifications<Partial<Account>>>{
       $topic: 'fractionTreasuryAccount',

@@ -241,13 +241,13 @@ export class VaultSetup {
   // -----------------
   // Guards
   // -----------------
-  private hasFractionMint(this: VaultSetup): this is HasFractionMint {
+  hasFractionMint(this: VaultSetup): this is HasFractionMint {
     return this.fractionMint != null && this.fractionMintAuthority != null;
   }
-  private hasFractionTreasury(this: VaultSetup): this is HasFractionTreasury {
+  hasFractionTreasury(this: VaultSetup): this is HasFractionTreasury {
     return this.fractionTreasury != null;
   }
-  private hasRedeemTreasury(this: VaultSetup): this is HasRedeemTreasury {
+  hasRedeemTreasury(this: VaultSetup): this is HasRedeemTreasury {
     return this.redeemTreasury != null;
   }
 

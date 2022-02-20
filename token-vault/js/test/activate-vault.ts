@@ -6,14 +6,15 @@ import {
   assertInactiveVault,
   initVault,
   killStuckProcess,
-  spokSameBignum,
+  logDebug,
+  verifyTokenBalance,
 } from './utils';
 import { Transaction } from '@solana/web3.js';
 import {
   assertConfirmedTransaction,
   assertError,
   assertTransactionSummary,
-  tokenBalanceFor,
+  TokenBalances,
 } from '@metaplex-foundation/amman';
 import {
   activateVault,
@@ -21,7 +22,6 @@ import {
   addTokenToInactiveVault,
   SafetyDepositSetup,
 } from '../src/mpl-token-vault';
-import spok from 'spok';
 
 killStuckProcess();
 
@@ -33,7 +33,6 @@ test('activate vault: inactive vault with no tokens added activate 0 number of s
     authority: vaultAuthority,
     vaultAuthorityPair,
     fractionMint,
-    fractionMintAuthority,
     fractionTreasury,
   } = initVaultAccounts;
 
@@ -59,16 +58,12 @@ test('activate vault: inactive vault with no tokens added activate 0 number of s
 
   await assertActiveVault(t, connection, initVaultAccounts);
 
-  const tokenBalance = await tokenBalanceFor(connection, {
-    sig: res.txSignature,
-    mint: fractionMint,
-    owner: fractionMintAuthority,
-  });
-  spok(t, tokenBalance, {
-    $topic: 'fractionalMintAuthority tokens',
-    amountPre: spokSameBignum(0),
-    amountPost: spokSameBignum(NUMBER_OF_SHARES),
-  });
+  const tokens = await TokenBalances.forTransaction(
+    connection,
+    res.txSignature,
+    addressLabels,
+  ).dump(logDebug);
+  await verifyTokenBalance(t, tokens, fractionTreasury, fractionMint, 0, NUMBER_OF_SHARES);
 });
 
 test('activate vault: inactive vault with no tokens added activate 1000 number of shares', async (t) => {
@@ -80,7 +75,6 @@ test('activate vault: inactive vault with no tokens added activate 1000 number o
     vaultAuthorityPair,
     fractionMint,
     fractionTreasury,
-    fractionMintAuthority,
   } = initVaultAccounts;
 
   addressLabels.addLabels(initVaultAccounts);
@@ -103,16 +97,12 @@ test('activate vault: inactive vault with no tokens added activate 1000 number o
   });
 
   await assertActiveVault(t, connection, initVaultAccounts);
-  const tokenBalance = await tokenBalanceFor(connection, {
-    sig: res.txSignature,
-    mint: fractionMint,
-    owner: fractionMintAuthority,
-  });
-  spok(t, tokenBalance, {
-    $topic: 'fractionalMintAuthority tokens',
-    amountPre: spokSameBignum(0),
-    amountPost: spokSameBignum(NUMBER_OF_SHARES),
-  });
+  const tokens = await TokenBalances.forTransaction(
+    connection,
+    res.txSignature,
+    addressLabels,
+  ).dump(logDebug);
+  await verifyTokenBalance(t, tokens, fractionTreasury, fractionMint, 0, NUMBER_OF_SHARES);
 });
 
 test('activate vault: inactive vault with no tokens added activate providing invalid vaultAuthority', async (t) => {
@@ -161,7 +151,6 @@ test('activate vault: inactive vault with tokens added activate 111 number of sh
     vaultAuthorityPair,
     fractionMint,
     fractionTreasury,
-    fractionMintAuthority,
   } = initVaultAccounts;
 
   addressLabels.addLabels(initVaultAccounts);
@@ -216,15 +205,11 @@ test('activate vault: inactive vault with tokens added activate 111 number of sh
     });
 
     await assertActiveVault(t, connection, initVaultAccounts, { tokenTypeCount: 1 });
-    const tokenBalance = await tokenBalanceFor(connection, {
-      sig: res.txSignature,
-      mint: fractionMint,
-      owner: fractionMintAuthority,
-    });
-    spok(t, tokenBalance, {
-      $topic: 'fractionalMintAuthority tokens',
-      amountPre: spokSameBignum(0),
-      amountPost: spokSameBignum(NUMBER_OF_SHARES),
-    });
+    const tokens = await TokenBalances.forTransaction(
+      connection,
+      res.txSignature,
+      addressLabels,
+    ).dump(logDebug);
+    await verifyTokenBalance(t, tokens, fractionTreasury, fractionMint, 0, NUMBER_OF_SHARES);
   }
 });

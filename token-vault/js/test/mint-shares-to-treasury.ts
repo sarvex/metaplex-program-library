@@ -7,15 +7,17 @@ import {
   initAndActivateVault,
   initVault,
   killStuckProcess,
+  logDebug,
   spokSameBignum,
   spokSamePubkey,
+  verifyTokenBalance,
 } from './utils';
 import { Signer, Transaction } from '@solana/web3.js';
 import {
   assertConfirmedTransaction,
   assertError,
   assertTransactionSummary,
-  tokenBalanceFor,
+  TokenBalances,
 } from '@metaplex-foundation/amman';
 import { mintSharesToTreasury } from '../src/instructions/mint-shares-to-treasury';
 import { MintFractionalSharesInstructionAccounts } from '../src/mpl-token-vault';
@@ -70,17 +72,17 @@ test('mint shares: active vault which allows further share creation, mint variou
 
     const expectedTotal = new BN(numberOfShares).add(new BN(previouslyMinted));
 
-    // Ensure the mint authority minted the tokens
-    const tokenBalance = await tokenBalanceFor(connection, {
-      sig: res.txSignature,
-      mint: fractionMint,
-      owner: fractionMintAuthority,
-    });
-    spok(t, tokenBalance, {
-      $topic: 'tokenBalance fractionMintAuthority',
-      amountPre: spokSameBignum(previouslyMinted),
-      amountPost: spokSameBignum(expectedTotal),
-    });
+    // Ensure the mint authority minted the tokens to fractionTreasury
+    const tokens = TokenBalances.forTransaction(connection, res.txSignature, addressLabels);
+    await tokens.dump(logDebug);
+    await verifyTokenBalance(
+      t,
+      tokens,
+      fractionTreasury,
+      fractionMint,
+      previouslyMinted,
+      expectedTotal,
+    );
 
     // Ensure fractionTreasury received the tokens
     const fractionTreasuryAccount = await getAccount(connection, fractionTreasury);

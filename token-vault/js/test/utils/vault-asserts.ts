@@ -2,7 +2,7 @@ import { Test } from 'tape';
 import { Connection } from '@solana/web3.js';
 import spok from 'spok';
 import { InitVaultInstructionAccounts, Key, Vault, VaultState } from '../../src/generated';
-import { assertIsNotNull, spokSameBignum, spokSamePubkey } from './asserts';
+import { spokSameBignum, spokSamePubkey } from './asserts';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 export async function assertInactiveVault(
@@ -23,6 +23,14 @@ export async function assertActiveVault(
   return assertVault(t, connection, initVaultAccounts, { ...args, state: VaultState.Active });
 }
 
+export async function assertCombinedVault(
+  t: Test,
+  connection: Connection,
+  initVaultAccounts: InitVaultInstructionAccounts,
+  args: { allowFurtherShareCreation?: boolean; tokenTypeCount?: number } = {},
+) {
+  return assertVault(t, connection, initVaultAccounts, { ...args, state: VaultState.Combined });
+}
 async function assertVault(
   t: Test,
   connection: Connection,
@@ -41,9 +49,7 @@ async function assertVault(
     pricingLookupAddress,
   } = initVaultAccounts;
 
-  const vaultAccountInfo = await connection.getAccountInfo(vault);
-  assertIsNotNull(t, vaultAccountInfo);
-  const [vaultAccount] = Vault.fromAccountInfo(vaultAccountInfo);
+  const vaultAccount = await Vault.fromAccountAddress(connection, vault);
 
   spok(t, vaultAccount, {
     $topic: 'vaultAccount',

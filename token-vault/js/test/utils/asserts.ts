@@ -2,7 +2,9 @@ import { Test } from 'tape';
 import { bignum, COption } from '@metaplex-foundation/beet';
 import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
-import { Specification, Specifications } from 'spok';
+import spok, { Specification, Specifications } from 'spok';
+import { TokenBalances } from '@metaplex-foundation/amman';
+import { addressLabels } from './address-labels';
 
 type Assert = {
   equal(actual: any, expected: any, msg?: string): void;
@@ -29,8 +31,8 @@ export const spokOffCurvePubkey: Specifications<PublicKey> = (function () {
   return same;
 })();
 
-export function spokSameBignum(a: bignum): Specification<bignum> {
-  const same = (b?: bignum) => b != null && new BN(a).eq(new BN(b));
+export function spokSameBignum(a: BN | bignum): Specification<bignum> {
+  const same = (b?: BN | bignum) => b != null && new BN(a).eq(new BN(b));
 
   same.$spec = `spokSameBignum(${a})`;
   same.$description = `${a} equal`;
@@ -39,4 +41,21 @@ export function spokSameBignum(a: bignum): Specification<bignum> {
 
 export function assertIsNotNull<T>(t: Test, x: T | null | undefined): asserts x is T {
   t.ok(x, 'should be non null');
+}
+
+export async function verifyTokenBalance(
+  t: Test,
+  tokens: TokenBalances,
+  account: PublicKey,
+  mint: PublicKey,
+  pre: bignum,
+  post: bignum,
+) {
+  const balance = await tokens.balance(account, mint);
+  assertIsNotNull(t, balance);
+  spok(t, balance, {
+    $topic: addressLabels.resolve(account),
+    amountPre: spokSameBignum(pre),
+    amountPost: spokSameBignum(post),
+  });
 }

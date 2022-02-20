@@ -5,7 +5,7 @@
 // Make sure to have a local validator running to try this as is, i.e. via `yarn amman:start`
 
 import { Connection, Keypair, sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
-import { airdrop, LOCALHOST, tokenBalanceFor } from '@metaplex-foundation/amman';
+import { airdrop, LOCALHOST, TokenBalances } from '@metaplex-foundation/amman';
 import { strict as assert } from 'assert';
 
 // These help us identify public keys, make sure to run with
@@ -87,12 +87,7 @@ async function main() {
     // as part of the activate vault transaction
     const fractionMintAuthority = await pdaForVault(initVaultAccounts.vault);
     addressLabels.addLabels({ fractionMintAuthority });
-    const tokenBalance = await tokenBalanceFor(connection, {
-      sig,
-      mint: fractionMint,
-      owner: fractionMintAuthority,
-    });
-    console.log({ tokenBalance });
+    await TokenBalances.forTransaction(connection, sig, addressLabels).dump();
   }
 
   // -----------------

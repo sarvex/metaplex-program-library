@@ -1,7 +1,6 @@
 import { Connection, Keypair, PublicKey, Signer, TransactionInstruction } from '@solana/web3.js';
 import { createTokenAccount, getTokenRentExempt, pdaForVault } from '../common/helpers';
 import { CombineVaultInstructionAccounts, createCombineVaultInstruction } from '../generated';
-import { VAULT_PREFIX, VAULT_PROGRAM_ID } from '../mpl-token-vault';
 import { strict as assert } from 'assert';
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
@@ -70,7 +69,7 @@ export class CombineVaultSetup {
     },
   ) {
     const { newVaultAuthority = accounts.vaultAuthority, vault } = accounts;
-    const fractionBurnAuthority = await getFractionBurnAuthority(vault);
+    const fractionBurnAuthority = await pdaForVault(vault);
 
     return new CombineVaultSetup(
       connection,
@@ -91,6 +90,7 @@ export class CombineVaultSetup {
    *    Here we assume that there aren't any and thus don't mint any to the account we create
    */
   async createOutstandingShares(payer: PublicKey) {
+    assert(!this.hasOutstandingShares(), 'cannot provide/create outstanding shares twice');
     const rentExempt = await getTokenRentExempt(this.connection);
     const [instructions, signers, { tokenAccount, tokenAccountPair }] = createTokenAccount(
       payer,
@@ -111,6 +111,7 @@ export class CombineVaultSetup {
    * 3. Create payment account
    */
   async createPayment(payer: PublicKey) {
+    assert(!this.hasPayment(), 'cannot provide/create payment twice');
     const rentExempt = await getTokenRentExempt(this.connection);
     const [instructions, signers, { tokenAccount, tokenAccountPair }] = createTokenAccount(
       payer,
@@ -138,6 +139,7 @@ export class CombineVaultSetup {
   approveTransfers(payer: PublicKey) {
     assert(this.hasOutstandingShares(), 'need to provide or create outstandingShares first');
     assert(this.hasPayment(), 'need to provide or create payment first');
+    assert(!this.hasTransferAuthority(), 'cannot approve twice');
 
     const transferAuthorityPair = Keypair.generate();
     this.transferAuthority = transferAuthorityPair.publicKey;
@@ -299,15 +301,4 @@ export class CombineVaultSetup {
  */
 export async function combineVault(combineSetup: CombineVaultSetup) {
   return createCombineVaultInstruction(combineSetup.accounts);
-}
-
-// -----------------
-// Helpers
-// -----------------
-async function getFractionBurnAuthority(vault: PublicKey) {
-  const [pda, _] = await PublicKey.findProgramAddress(
-    [Buffer.from(VAULT_PREFIX), VAULT_PROGRAM_ID.toBuffer(), vault.toBuffer()],
-    VAULT_PROGRAM_ID,
-  );
-  return pda;
 }
